@@ -1,1 +1,2 @@
 # diarry
+Nothing substantial yet.
