@@ -1,5 +1,9 @@
 # Create a new DiaryEntry
-curl -H -i "Accept: Application/json" -H "Content-Type: application/json" -d '{"title": "Train", "body": "Training Insane" localhost:8000/api/entries/new
+curl -i "Accept: Application/json" -H "Content-Type: application/json" -d '{"title": "Nothing much", "body": "Today I did a lot of things, dear diary, what did you do?"}' localhost:8000/api/entries/new
 
 # Access a DiaryEntry by id
 curl localhost:8000/api/entries/1
+
+# List all DiaryEntries
+
+curl localhost:8000/api/entries/all

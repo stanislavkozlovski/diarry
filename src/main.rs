@@ -78,10 +78,16 @@ fn diary_details_controller(id: i32) -> Option<JSON<DiaryEntry>> {
     }
 }
 
+#[get("/api/entries/all")]
+fn all_diary_entries_controller() -> JSON<Vec<DiaryEntry>> {
+    let connection: PgConnection = establish_connection();
+    JSON(fetch_all_diary_entries(&connection))
+}
+
 fn main() {
     fetch_all_diary_entries(&establish_connection());
     rocket::ignite()
-        .mount("/", routes![new_diary_controller, diary_details_controller])
+        .mount("/", routes![new_diary_controller, diary_details_controller, all_diary_entries_controller])
         .launch();
 }
 
@@ -129,5 +135,15 @@ mod tests {
         let expected_entries: Vec<DiaryEntry> = diary_entries.load::<DiaryEntry>(&connection).unwrap();
 
         assert_eq!(fetch_all_diary_entries(&connection), expected_entries);
+    }
+
+    use rocket_contrib::JSON;
+    use all_diary_entries_controller;
+    #[test]
+    fn test_all_diary_entries_controller_should_return_all_entries_in_json() {
+        let connection: PgConnection = establish_connection();
+        let expected_entries: JSON<Vec<DiaryEntry>> = JSON(diary_entries.load::<DiaryEntry>(&connection).unwrap());
+
+        assert_eq!(all_diary_entries_controller().into_inner(), expected_entries.into_inner());
     }
 }
