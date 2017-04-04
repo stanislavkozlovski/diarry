@@ -22,10 +22,22 @@ impl PartialEq for DiaryEntry {
         return self.id == other.id;
     }
 }
+
+impl DiaryEntry {
+    pub fn get_absolute_url(&self) -> String {
+        return format!("/api/entries/{}", &self.id)
+    }
+}
 #[derive(Deserialize)]
 #[derive(Insertable)]
 #[table_name="diary_entries"]
 pub struct NewDiaryEntry {
     pub title: String,
     pub body: String,
+}
+
+#[derive(Debug)]
+#[derive(Serialize)]
+pub struct ErrorDetails {
+    pub error_message: String
 }
