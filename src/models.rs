@@ -1,15 +1,16 @@
 extern crate chrono;
-use self::chrono::{DateTime, UTC};
 extern crate diesel;
-use self::diesel::types::Date;
 use super::schema::diary_entries;
+use self::chrono::{NaiveDate, NaiveTime};
+
 
 #[derive(Queryable)]
 pub struct DiaryEntry {
     pub id: i32,
     pub title: String,
     pub body: String,
-    // pub date: Date
+    pub date: NaiveDate,
+    pub time: NaiveTime
 }
 
 

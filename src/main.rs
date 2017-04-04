@@ -2,25 +2,20 @@
 #![plugin(rocket_codegen)]
 
 extern crate rocket;
-
 #[macro_use] extern crate diesel;
 extern crate dotenv;
+#[macro_use] extern crate diesel_codegen;
+
+pub mod models;
+pub mod schema;
 
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use dotenv::dotenv;
 use std::env;
-
-#[macro_use] extern crate diesel_codegen;
-pub mod models;
-pub mod schema;
-
-// use models::DiaryEntry;
-// extern crate
-
 use self::models::{DiaryEntry, NewDiaryEntry};
 
-pub fn create_post<'a>(conn: &PgConnection, title: &'a str, body: &'a str) -> DiaryEntry {
+pub fn create_diary_entry<'a>(conn: &PgConnection, title: &'a str, body: &'a str) -> DiaryEntry {
     use schema::diary_entries;
 
     let new_entry = NewDiaryEntry {
@@ -47,19 +42,22 @@ fn index() -> &'static str {
     "Hello, World!"
 }
 
-fn find_last_five_entries() {
-    use schema::diary_entries::dsl::*;
-
-    let connection = establish_connection();
-    let results = diary_entries.load::<DiaryEntry>(&connection);
-}
-
 fn main() {
-    let post: DiaryEntry = create_post(&establish_connection(), "What up", "Nothing");
-    println!("{:?}", post.title);
+    let post: DiaryEntry = create_diary_entry(&establish_connection(), "What up", "Nothing");
+    println!("{:?}", post.date);
+    println!("{:?}", post.time);
+    
     rocket::ignite()
         .mount("/", routes![index])
         .launch();
+}
 
-    
+#[cfg(test)]
+mod tests {
+    use establish_connection;
+    #[test]
+    fn test_connects_to_db() {
+        // should not panic
+        establish_connection();
+    }
 }
