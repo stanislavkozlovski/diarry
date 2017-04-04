@@ -5,7 +5,10 @@ use super::schema::diary_entries;
 use self::chrono::{NaiveDate, NaiveTime};
 
  
+#[derive(Debug)]
 #[derive(Queryable)]
+#[derive(Deserialize)]
+#[derive(Serialize)]
 pub struct DiaryEntry {
     pub id: i32,
     pub title: String,
@@ -14,6 +17,11 @@ pub struct DiaryEntry {
     pub time: NaiveTime
 }
 
+impl PartialEq for DiaryEntry {
+    fn eq(&self, other: &DiaryEntry) -> bool {
+        return self.id == other.id;
+    }
+}
 #[derive(Deserialize)]
 #[derive(Insertable)]
 #[table_name="diary_entries"]
