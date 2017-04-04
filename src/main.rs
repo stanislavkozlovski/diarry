@@ -18,7 +18,7 @@ use self::models::{DiaryEntry, NewDiaryEntry};
 #[macro_use] extern crate rocket_contrib;
 #[macro_use] extern crate serde_derive;
 
-#[cfg(test)] mod tests;
+// #[cfg(test)] mod tests;
 use rocket::response::status;
 use rocket::http::Status;
 use rocket::response::content;
@@ -38,6 +38,16 @@ pub fn create_diary_entry<'a>(conn: &PgConnection, title: &'a str, body: &'a str
         .expect("Error saving new post")
 }
 
+pub fn fetch_diary_entry(conn: &PgConnection, id: i32) -> Option<DiaryEntry> {
+    use self::schema::diary_entries::dsl::*;
+    let result = diary_entries.find(id).first(conn);
+    match result {
+        Ok(r) => Some(r),
+        Err(r) => None
+    }
+    
+}
+
 pub fn establish_connection() -> PgConnection {
     use schema::diary_entries::dsl::*;
     dotenv().ok();
@@ -51,7 +61,7 @@ fn index() -> &'static str {
     "Hello, World!"
 }
 
-#[post("/entries/new", format = "application/json", data = "<new_entry>")]
+#[post("/api/entries/new", format = "application/json", data = "<new_entry>")]
 fn new(new_entry: JSON<NewDiaryEntry>) -> Result<Created<String>, String>{
     if (new_entry.body.len() <= 3 || new_entry.title.len() <= 3) {
         return Err(String::from("A"));
