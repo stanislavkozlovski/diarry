@@ -1,6 +1,5 @@
 #![feature(plugin)]
 #![plugin(rocket_codegen)]
-
 extern crate rocket;
 #[macro_use] extern crate diesel;
 extern crate dotenv;
@@ -15,12 +14,23 @@ use dotenv::dotenv;
 use std::env;
 use self::models::{DiaryEntry, NewDiaryEntry};
 
+
+#[macro_use] extern crate rocket_contrib;
+#[macro_use] extern crate serde_derive;
+
+#[cfg(test)] mod tests;
+use rocket::response::status;
+use rocket::http::Status;
+use rocket::response::content;
+use rocket_contrib::{JSON, Value};
+use rocket::response::status::{Created};
+
 pub fn create_diary_entry<'a>(conn: &PgConnection, title: &'a str, body: &'a str) -> DiaryEntry {
     use schema::diary_entries;
 
     let new_entry = NewDiaryEntry {
-        title: title,
-        body: body,
+        title: String::from(title),
+        body: String::from(body),
     };
 
     diesel::insert(&new_entry).into(diary_entries::table)
@@ -30,7 +40,6 @@ pub fn create_diary_entry<'a>(conn: &PgConnection, title: &'a str, body: &'a str
 
 pub fn establish_connection() -> PgConnection {
     use schema::diary_entries::dsl::*;
-    
     dotenv().ok();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -42,13 +51,19 @@ fn index() -> &'static str {
     "Hello, World!"
 }
 
+#[post("/entries/new", format = "application/json", data = "<new_entry>")]
+fn new(new_entry: JSON<NewDiaryEntry>) -> Result<Created<String>, String>{
+    if (new_entry.body.len() <= 3 || new_entry.title.len() <= 3) {
+        return Err(String::from("A"));
+    }
+    create_diary_entry(&establish_connection(), new_entry.title.as_str(), new_entry.body.as_str());
+
+    Ok(Created(String::from("Created"), Some(String::from("Created"))))
+}
+
 fn main() {
-    let post: DiaryEntry = create_diary_entry(&establish_connection(), "What up", "Nothing");
-    println!("{:?}", post.date);
-    println!("{:?}", post.time);
-    
     rocket::ignite()
-        .mount("/", routes![index])
+        .mount("/", routes![index, new])
         .launch();
 }
 

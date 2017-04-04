@@ -6,7 +6,10 @@ authors = ["Enether <familyguyuser192@windowslive.com>"]
 [dependencies]
 rocket = "0.2.4"
 rocket_codegen = "0.2.4"
+rocket_contrib = "0.2.4"
 diesel = { version = "0.11.0", features = ["postgres", "chrono"] }
 diesel_codegen = { version = "0.11.0", features = ["postgres"] }
 dotenv = "0.8.0"
 chrono = { version = "0.3", features = ["serde", "rustc-serialize"] }
+serde_derive = "0.9.12"
+serde = "0.9.12"

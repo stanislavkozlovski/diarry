@@ -1,9 +1,10 @@
 extern crate chrono;
 extern crate diesel;
+extern crate rocket_contrib;
 use super::schema::diary_entries;
 use self::chrono::{NaiveDate, NaiveTime};
 
-
+ 
 #[derive(Queryable)]
 pub struct DiaryEntry {
     pub id: i32,
@@ -13,10 +14,10 @@ pub struct DiaryEntry {
     pub time: NaiveTime
 }
 
-
+#[derive(Deserialize)]
 #[derive(Insertable)]
 #[table_name="diary_entries"]
-pub struct NewDiaryEntry<'a> {
-    pub title: &'a str,
-    pub body: &'a str,
+pub struct NewDiaryEntry {
+    pub title: String,
+    pub body: String,
 }
