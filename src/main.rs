@@ -1,9 +1,11 @@
 #![feature(plugin)]
 #![plugin(rocket_codegen)]
 extern crate rocket;
+#[macro_use] extern crate rocket_contrib;
+#[macro_use] extern crate serde_derive;
 #[macro_use] extern crate diesel;
-extern crate dotenv;
 #[macro_use] extern crate diesel_codegen;
+extern crate dotenv;
 
 pub mod models;
 pub mod schema;
@@ -13,16 +15,10 @@ use diesel::pg::PgConnection;
 use dotenv::dotenv;
 use std::env;
 use self::models::{DiaryEntry, NewDiaryEntry};
-
-
-#[macro_use] extern crate rocket_contrib;
-#[macro_use] extern crate serde_derive;
-
-// #[cfg(test)] mod tests;
 use rocket::response::status;
 use rocket::http::Status;
 use rocket::response::content;
-use rocket_contrib::{JSON, Value};
+use rocket_contrib::JSON;
 use rocket::response::status::{Created};
 
 pub fn create_diary_entry<'a>(conn: &PgConnection, title: &'a str, body: &'a str) -> DiaryEntry {
@@ -39,7 +35,7 @@ pub fn create_diary_entry<'a>(conn: &PgConnection, title: &'a str, body: &'a str
 }
 
 pub fn fetch_diary_entry(conn: &PgConnection, id: i32) -> Option<DiaryEntry> {
-    use self::schema::diary_entries::dsl::*;
+    use self::schema::diary_entries::dsl::diary_entries;
     let result = diary_entries.find(id).first(conn);
     match result {
         Ok(r) => Some(r),
@@ -49,16 +45,10 @@ pub fn fetch_diary_entry(conn: &PgConnection, id: i32) -> Option<DiaryEntry> {
 }
 
 pub fn establish_connection() -> PgConnection {
-    use schema::diary_entries::dsl::*;
     dotenv().ok();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url))
-}
-
-#[get("/")]
-fn index() -> &'static str {
-    "Hello, World!"
 }
 
 #[post("/api/entries/new", format = "application/json", data = "<new_entry>")]
@@ -71,9 +61,19 @@ fn new(new_entry: JSON<NewDiaryEntry>) -> Result<Created<String>, String>{
     Ok(Created(String::from("Created"), Some(String::from("Created"))))
 }
 
+#[get("/api/entries/<id>")]
+fn diary_details(id: i32) -> Option<JSON<DiaryEntry>> {
+    println!("{:?}", id);
+    if let Some(diary) = fetch_diary_entry(&establish_connection(), id) {
+        return Some(JSON(diary))
+    } else {
+        return None
+    }
+}
+
 fn main() {
     rocket::ignite()
-        .mount("/", routes![index, new])
+        .mount("/", routes![new, diary_details])
         .launch();
 }
 
@@ -84,5 +84,33 @@ mod tests {
     fn test_connects_to_db() {
         // should not panic
         establish_connection();
+    }
+
+    use {fetch_diary_entry, diary_details};
+    #[test]
+    fn test_details_should_return_correct_entry() {
+        let expected_entry = fetch_diary_entry(&establish_connection(), 1).unwrap();
+        assert_eq!(diary_details(1).unwrap().into_inner(), expected_entry);
+    }
+    #[test]
+    fn test_details_should_return_none_with_incorrect_id() {
+        assert!(diary_details(i32::max_value()).is_none())
+    }
+    // mod schema;
+    use schema::diary_entries::dsl::diary_entries;
+    use diesel::prelude::*;
+    
+    use diesel::pg::PgConnection;
+    use models::DiaryEntry;
+    #[test]
+    fn test_fetch_diary_entry_should_return_corresponding_entry() {
+        let connection: PgConnection = establish_connection();
+        let expected_entry: QueryResult<DiaryEntry> = diary_entries.find(1).first(&connection);
+        assert_eq!(fetch_diary_entry(&connection, 1).unwrap(), expected_entry.unwrap());
+    }
+    #[test]
+    fn test_fetch_diary_entry_non_existing_id_should_return_none() {
+        let connection: PgConnection = establish_connection();
+        assert!(fetch_diary_entry(&connection, i32::max_value()).is_none());
     }
 }
