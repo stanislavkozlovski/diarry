@@ -43,7 +43,12 @@ pub fn fetch_diary_entry(conn: &PgConnection, id: i32) -> Option<DiaryEntry> {
         Ok(r) => Some(r),
         Err(r) => None
     }
-    
+}
+
+pub fn fetch_all_diary_entries(conn: &PgConnection) -> Vec<DiaryEntry> {
+    /* Returns a Vector of all the Diary Entries*/
+    use self::schema::diary_entries::dsl::diary_entries;
+    diary_entries.load::<DiaryEntry>(conn).unwrap()
 }
 
 pub fn establish_connection() -> PgConnection {
@@ -74,6 +79,7 @@ fn diary_details_controller(id: i32) -> Option<JSON<DiaryEntry>> {
 }
 
 fn main() {
+    fetch_all_diary_entries(&establish_connection());
     rocket::ignite()
         .mount("/", routes![new_diary_controller, diary_details_controller])
         .launch();
@@ -114,5 +120,14 @@ mod tests {
     fn test_fetch_diary_entry_non_existing_id_should_return_none() {
         let connection: PgConnection = establish_connection();
         assert!(fetch_diary_entry(&connection, i32::max_value()).is_none());
+    }
+
+    use fetch_all_diary_entries;
+    #[test]
+    fn test_fetch_all_diary_entries_should_return_them_all() {
+        let connection: PgConnection = establish_connection();
+        let expected_entries: Vec<DiaryEntry> = diary_entries.load::<DiaryEntry>(&connection).unwrap();
+
+        assert_eq!(fetch_all_diary_entries(&connection), expected_entries);
     }
 }
