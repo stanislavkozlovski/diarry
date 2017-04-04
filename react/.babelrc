@@ -1,0 +1,12 @@
+{
+    "presets": [
+        "react",
+        ["es2015", {"modules": false}]/*webpack takes care of modules, we don't need babel to*/
+    ],
+    "env": {
+        /* when in test environment, use Babel on the test modules (for import syntax at least) */
+        "test": {
+            "plugins": ["transform-es2015-modules-commonjs"]
+        }
+    }
+}
