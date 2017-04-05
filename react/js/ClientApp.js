@@ -4,7 +4,7 @@ import { HashRouter, Match } from 'react-router'
 
 import DiaryDetails from './DiaryDetails.js'
 import LandingPage from './Landing.js'
-
+import Sidebar from './Sidebar.js'
 import '../public/css/5grid/core-desktop.css'
 import '../public/css/5grid/core-1200px.css'
 import '../public/css/5grid/core-noscript.css'
@@ -17,11 +17,14 @@ const App = React.createClass({
     return (
       <HashRouter>
         <div className='app'>
-          <div id='content' className='mobileUI-main-content'>
-            <div id='content-inner'>
-              <Match exactly pattern='/entry/:id' component={DiaryDetails} />
-              <Match exactly pattern='/' component={LandingPage} />
+          <div id='wrapper'>
+            <div id='content' className='mobileUI-main-content'>
+              <div id='content-inner'>
+                <Match exactly pattern='/entry/:id' component={DiaryDetails} />
+                <Match exactly pattern='/' component={LandingPage} />
+              </div>
             </div>
+            <Sidebar />
           </div>
         </div>
       </HashRouter>

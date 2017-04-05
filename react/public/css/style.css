@@ -606,6 +606,7 @@
 
 	#wrapper
 	{
+		min-height: 1800px;
 		position: relative;
 	}
 

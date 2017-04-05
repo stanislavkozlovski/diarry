@@ -137,13 +137,13 @@
 		padding: 3em 5em 8em 5em;
 	}
 
-		body.left-sidebar #content
+		#content
 		{
 			margin-left: 21em; /* = sidebar width + 7 */
 		}
 		
-		body.right-sidebar #content
+		/*#content
 		{
 			margin-right: 14em; /* = sidebar width */
-			margin-left: 7em;
-		}
+			/*margin-left: 7em;*/
+		/*} */
