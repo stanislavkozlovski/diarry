@@ -9,6 +9,27 @@ const DiaryDetails = React.createClass({
       id: string
     })
   },
+
+  componentWillReceiveProps (nextProps) {
+    // TODO: Maybe add some sort of animation
+
+    /* query the backend for details for a specific DiaryEntry and show it to the user */
+    axios.get(`http://localhost:8000/api/entries/${nextProps.params.id}`)
+    .then(resp => {
+      this.setState(resp.data)
+    }).catch(err => {
+      if (err.response) {
+        if (err.response.status === 404) {
+          this.setState({error: `No entry with ID ${nextProps.params.id} exists!`})
+        } else {
+          console.log(`Unexpected error: ${err}`)
+        }
+      } else {
+        console.log(`Unexpected error: ${err}`)
+      }
+    })
+  },
+
   componentDidMount () {
     /* query the backend for details for a specific DiaryEntry and show it to the user */
     axios.get(`http://localhost:8000/api/entries/${this.props.params.id}`)
