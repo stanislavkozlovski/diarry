@@ -9,21 +9,26 @@ extern crate dotenv;
 
 pub mod models;
 pub mod schema;
+pub mod cors;
 
+use std::env;
+use std::io::Cursor;
 
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use dotenv::dotenv;
-use std::env;
-use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails};
+
 use rocket::response::status;
+use rocket::response::status::{Created};
 use rocket::response::content;
 use rocket_contrib::JSON;
-use rocket::response::status::{Created};
 use rocket::http::hyper::header::{Headers, AccessControlAllowOrigin};
-use rocket::Response;
-use std::io::Cursor;
 use rocket::http::{Status, ContentType};
+use rocket::Response;
+
+use cors::{CORS};
+use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails};
+
 
 pub fn create_diary_entry<'a>(conn: &PgConnection, title: &'a str, body: &'a str) -> DiaryEntry {
     /* Creates a new DiaryEntry in the database */
@@ -102,9 +107,10 @@ fn diary_details_controller<'a>(id: i32) -> Response<'static> {
 }
 
 #[get("/api/entries/all")]
-fn all_diary_entries_controller() -> JSON<Vec<DiaryEntry>> {
+fn all_diary_entries_controller() -> CORS<JSON<Vec<DiaryEntry>>> {
+    /* Return all the Diary Entries */
     let connection: PgConnection = establish_connection();
-    JSON(fetch_all_diary_entries(&connection))
+    CORS::any(JSON(fetch_all_diary_entries(&connection)))
 }
 
 fn main() {
@@ -127,7 +133,7 @@ mod tests {
     #[test]
     fn test_details_should_return_correct_entry_and_200() {
         let mut response: Response = diary_details_controller(1);
-        
+
         let expected_entry = fetch_diary_entry(&establish_connection(), 1).unwrap();
         let received_entry: DiaryEntry = serde_json::from_str(
             &response.body().unwrap().into_string().unwrap()
@@ -179,11 +185,13 @@ mod tests {
 
     use rocket_contrib::JSON;
     use all_diary_entries_controller;
+    use std::ops::Deref;
     #[test]
     fn test_all_diary_entries_controller_should_return_all_entries_in_json() {
         let connection: PgConnection = establish_connection();
         let expected_entries: JSON<Vec<DiaryEntry>> = JSON(diary_entries.load::<DiaryEntry>(&connection).unwrap());
-
-        assert_eq!(all_diary_entries_controller().into_inner(), expected_entries.into_inner());
+        let response = all_diary_entries_controller();
+        let received_entries = response.get_responder().deref().deref();
+        assert_eq!(received_entries, expected_entries.into_inner().deref());
     }
 }
