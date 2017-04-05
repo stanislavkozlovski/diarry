@@ -10,16 +10,20 @@ extern crate dotenv;
 pub mod models;
 pub mod schema;
 
+
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use dotenv::dotenv;
 use std::env;
 use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails};
 use rocket::response::status;
-use rocket::http::Status;
 use rocket::response::content;
 use rocket_contrib::JSON;
 use rocket::response::status::{Created};
+use rocket::http::hyper::header::{Headers, AccessControlAllowOrigin};
+use rocket::Response;
+use std::io::Cursor;
+use rocket::http::{Status, ContentType};
 
 pub fn create_diary_entry<'a>(conn: &PgConnection, title: &'a str, body: &'a str) -> DiaryEntry {
     /* Creates a new DiaryEntry in the database */
@@ -70,12 +74,31 @@ fn new_diary_controller(new_entry: JSON<NewDiaryEntry>) -> Result<Created<JSON<D
 }
 
 #[get("/api/entries/<id>")]
-fn diary_details_controller(id: i32) -> Option<JSON<DiaryEntry>> {
-    if let Some(diary) = fetch_diary_entry(&establish_connection(), id) {
-        return Some(JSON(diary))
-    } else {
-        return None
+fn diary_details_controller<'a>(id: i32) -> Response<'static> {
+    let diary_entry: Option<DiaryEntry> = fetch_diary_entry(&establish_connection(), id);
+
+    if diary_entry.is_none() {
+        let error_message = ErrorDetails{ error_message: String::from(format!("Could not find a Diary Entry with ID {}", id)) };
+        return Response::build()
+                .status(Status::NotFound)
+                .header(ContentType::JSON)
+                .header(AccessControlAllowOrigin::Any)
+                .sized_body(Cursor::new(
+                    json!(error_message).to_string()
+                    ))
+                .finalize();
     }
+
+    let response: Response = Response::build()
+     .status(Status::Ok)
+     .header(ContentType::JSON)
+     .header(AccessControlAllowOrigin::Any)
+     .sized_body(Cursor::new(
+         json!(diary_entry.unwrap()).to_string()
+         ))
+     .finalize();
+
+    return response
 }
 
 #[get("/api/entries/all")]
@@ -85,7 +108,6 @@ fn all_diary_entries_controller() -> JSON<Vec<DiaryEntry>> {
 }
 
 fn main() {
-    fetch_all_diary_entries(&establish_connection());
     rocket::ignite()
         .mount("/", routes![new_diary_controller, diary_details_controller, all_diary_entries_controller])
         .launch();
@@ -99,18 +121,36 @@ mod tests {
         // should not panic
         establish_connection();
     }
+    extern crate serde_json;
 
     use {fetch_diary_entry, diary_details_controller};
     #[test]
-    fn test_details_should_return_correct_entry() {
+    fn test_details_should_return_correct_entry_and_200() {
+        let mut response: Response = diary_details_controller(1);
+        
         let expected_entry = fetch_diary_entry(&establish_connection(), 1).unwrap();
-        assert_eq!(diary_details_controller(1).unwrap().into_inner(), expected_entry);
+        let received_entry: DiaryEntry = serde_json::from_str(
+            &response.body().unwrap().into_string().unwrap()
+            ).unwrap();
+
+        assert_eq!(received_entry, expected_entry);
+        assert_eq!(response.status().code, 200);
     }
+    use rocket::Response;
+    use models::ErrorDetails;
     #[test]
-    fn test_details_should_return_none_with_incorrect_id() {
-        assert!(diary_details_controller(i32::max_value()).is_none())
+    fn test_details_should_return_error_message_and_404() {
+        let mut response: Response = diary_details_controller(i32::max_value());
+        let error_details: ErrorDetails = serde_json::from_str(
+                &response.body().unwrap().into_string().unwrap()
+            ).unwrap();
+        let error_message = error_details.error_message;
+        let expected_error_msg = format!("Could not find a Diary Entry with ID {}", i32::max_value());
+
+        assert_eq!(response.status().code, 404);
+        assert_eq!(error_message, expected_error_msg);
     }
-    // mod schema;
+
     use schema::diary_entries::dsl::diary_entries;
     use diesel::prelude::*;
     

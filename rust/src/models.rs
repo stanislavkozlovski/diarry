@@ -38,6 +38,7 @@ pub struct NewDiaryEntry {
 
 #[derive(Debug)]
 #[derive(Serialize)]
+#[derive(Deserialize)]
 pub struct ErrorDetails {
     pub error_message: String
 }
