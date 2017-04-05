@@ -27,7 +27,7 @@ use rocket::http::{Status, ContentType};
 use rocket::Response;
 
 use cors::{CORS};
-use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails};
+use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo};
 
 
 pub fn create_diary_entry<'a>(conn: &PgConnection, title: &'a str, body: &'a str) -> DiaryEntry {
@@ -123,9 +123,23 @@ fn all_diary_entries_controller() -> CORS<JSON<Vec<DiaryEntry>>> {
     CORS::any(JSON(fetch_all_diary_entries(&connection)))
 }
 
+#[get("/api/entries/last_five")]
+fn last_five_diary_entries_controller() -> CORS<JSON<Vec<DiaryEntryMetaInfo>>> {
+    /* Returns meta information about the last five diary entries */
+    let connection: PgConnection = establish_connection();
+    let last_five_entries: Vec<DiaryEntry> = fetch_last_five_diary_entries(&connection);
+    let mut entries_meta: Vec<DiaryEntryMetaInfo> = Vec::new();
+    // fill up the entries
+    for entry in last_five_entries {
+        entries_meta.push(DiaryEntryMetaInfo { title: entry.title.clone(), url: entry.get_absolute_url() });
+    }
+
+    return CORS::any(JSON(entries_meta));
+}
+
 fn main() {
     rocket::ignite()
-        .mount("/", routes![new_diary_controller, diary_details_controller, all_diary_entries_controller])
+        .mount("/", routes![new_diary_controller, diary_details_controller, all_diary_entries_controller, last_five_diary_entries_controller])
         .launch();
 }
 
@@ -171,7 +185,7 @@ mod tests {
     use diesel::prelude::*;
     
     use diesel::pg::PgConnection;
-    use models::DiaryEntry;
+    use models::{DiaryEntry, DiaryEntryMetaInfo};
     #[test]
     fn test_fetch_diary_entry_should_return_corresponding_entry() {
         let connection: PgConnection = establish_connection();
@@ -234,6 +248,27 @@ mod tests {
         let expected_entries: Vec<DiaryEntry> = diary_entries.order((creation_date.desc(), creation_time.desc())).limit(5).load::<DiaryEntry>(&connection).unwrap();
 
         assert_eq!(received_entries, expected_entries);
+    }
+
+    use last_five_diary_entries_controller;
+    #[test]
+    fn test_last_five_diary_entries_controller_returns_correct_entries() {
+        use schema::diary_entries::dsl::{creation_date, creation_time};
+        
+        let connection: PgConnection = establish_connection();
+        let expected_entries: Vec<DiaryEntry> = diary_entries.order((creation_date.desc(), creation_time.desc())).limit(5).load::<DiaryEntry>(&connection).unwrap();
+        let response = last_five_diary_entries_controller();
+        let received_entries: &Vec<DiaryEntryMetaInfo> = response.get_responder().deref();
+
+        assert_eq!(expected_entries.len(), received_entries.len());
+        for i in 0..expected_entries.len() {
+            let ref exp_entry: DiaryEntry = expected_entries[i];
+            let ref rec_entry: DiaryEntryMetaInfo = received_entries[i];
+
+            assert_eq!(rec_entry.title, exp_entry.title);
+            assert_eq!(rec_entry.url, exp_entry.get_absolute_url());
+        }
+        // assert each entry one by one
     }
 }
 

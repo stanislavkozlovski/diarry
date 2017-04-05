@@ -36,6 +36,14 @@ pub struct NewDiaryEntry {
     pub body: String,
 }
 
+#[derive(Deserialize)]
+#[derive(Serialize)]
+pub struct DiaryEntryMetaInfo {
+    /* Meta information about a DiaryEntry */
+    pub title: String,
+    pub url: String
+}
+
 #[derive(Debug)]
 #[derive(Serialize)]
 #[derive(Deserialize)]

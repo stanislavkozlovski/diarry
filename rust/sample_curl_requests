@@ -7,3 +7,6 @@ curl localhost:8000/api/entries/1
 # List all DiaryEntries
 
 curl localhost:8000/api/entries/all
+
+# Get meta information about the last 5 Diary DiaryEntries
+curl localhost:8000/api/entries/last_five
