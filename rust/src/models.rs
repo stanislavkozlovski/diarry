@@ -27,6 +27,10 @@ impl DiaryEntry {
     pub fn get_absolute_url(&self) -> String {
         return format!("/api/entries/{}", &self.id)
     }
+    pub fn get_react_url(&self) -> String {
+        // return the URL of the entry following the front-end routing
+        return format!("/entry/{}", &self.id)
+    }
 }
 #[derive(Deserialize)]
 #[derive(Insertable)]

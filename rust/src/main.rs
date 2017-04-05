@@ -131,7 +131,7 @@ fn last_five_diary_entries_controller() -> CORS<JSON<Vec<DiaryEntryMetaInfo>>> {
     let mut entries_meta: Vec<DiaryEntryMetaInfo> = Vec::new();
     // fill up the entries
     for entry in last_five_entries {
-        entries_meta.push(DiaryEntryMetaInfo { title: entry.title.clone(), url: entry.get_absolute_url() });
+        entries_meta.push(DiaryEntryMetaInfo { title: entry.title.clone(), url: entry.get_react_url() });
     }
 
     return CORS::any(JSON(entries_meta));
@@ -266,7 +266,7 @@ mod tests {
             let ref rec_entry: DiaryEntryMetaInfo = received_entries[i];
 
             assert_eq!(rec_entry.title, exp_entry.title);
-            assert_eq!(rec_entry.url, exp_entry.get_absolute_url());
+            assert_eq!(rec_entry.url, exp_entry.get_react_url());
         }
         // assert each entry one by one
     }
