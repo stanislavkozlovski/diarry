@@ -2,7 +2,7 @@ import React from 'react'
 import { render } from 'react-dom'
 import { HashRouter, Match } from 'react-router'
 
-import DiaryEntry from './DiaryEntry.js'
+import DiaryDetails from './DiaryDetails.js'
 
 import '../public/css/5grid/core-desktop.css'
 import '../public/css/5grid/core-1200px.css'
@@ -18,7 +18,7 @@ const App = React.createClass({
         <div className='app'>
           <div id='content' className='mobileUI-main-content'>
             <div id='content-inner'>
-              <Match exactly pattern='/entry/:id' component={DiaryEntry} />
+              <Match exactly pattern='/entry/:id' component={DiaryDetails} />
             </div>
           </div>
         </div>
