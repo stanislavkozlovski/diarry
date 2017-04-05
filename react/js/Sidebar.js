@@ -8,6 +8,7 @@ const Sidebar = React.createClass({
       recentPosts: []
     }
   },
+  
   componentDidMount() {
     // load the last 5 posts
     axios.get('http://localhost:8000/api/entries/last_five')
