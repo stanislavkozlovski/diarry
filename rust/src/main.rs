@@ -64,10 +64,18 @@ pub fn fetch_last_five_diary_entries(conn: &PgConnection) -> Vec<DiaryEntry> {
     return result;
 }
 
-pub fn fetch_all_diary_entries(conn: &PgConnection) -> Vec<DiaryEntry> {
-    /* Returns a Vector of all the Diary Entries*/
+pub fn fetch_all_diary_entries(conn: &PgConnection, order_by_date: bool) -> Vec<DiaryEntry> {
+    /* Returns a Vector of all the Diary Entries
+       param: order_by_date - if set, returns them ordered by their date and time descending
+    */
     use self::schema::diary_entries::dsl::diary_entries;
-    diary_entries.load::<DiaryEntry>(conn).unwrap()
+
+    if order_by_date {
+        use self::schema::diary_entries::dsl::{creation_date, creation_time};
+        return diary_entries.order((creation_date.desc(), creation_time.desc())).load::<DiaryEntry>(conn).unwrap()
+    } else {
+        return diary_entries.load::<DiaryEntry>(conn).unwrap();
+    }
 }
 
 pub fn establish_connection() -> PgConnection {
@@ -118,9 +126,9 @@ fn diary_details_controller<'a>(id: i32) -> Response<'static> {
 
 #[get("/api/entries/all")]
 fn all_diary_entries_controller() -> CORS<JSON<Vec<DiaryEntry>>> {
-    /* Return all the Diary Entries */
+    /* Return all the Diary Entries, ordered by their date descending */
     let connection: PgConnection = establish_connection();
-    CORS::any(JSON(fetch_all_diary_entries(&connection)))
+    CORS::any(JSON(fetch_all_diary_entries(&connection, true)))
 }
 
 #[get("/api/entries/last_five")]
@@ -199,21 +207,31 @@ mod tests {
     }
 
     use fetch_all_diary_entries;
+    use schema::diary_entries::dsl::{creation_date, creation_time};
     #[test]
     fn test_fetch_all_diary_entries_should_return_them_all() {
         let connection: PgConnection = establish_connection();
         let expected_entries: Vec<DiaryEntry> = diary_entries.load::<DiaryEntry>(&connection).unwrap();
 
-        assert_eq!(fetch_all_diary_entries(&connection), expected_entries);
+        assert_eq!(fetch_all_diary_entries(&connection, false), expected_entries);
+    }
+
+    #[test]
+    fn test_fetch_all_diary_entries_ordered_should_return_them_ordered() {
+        let connection: PgConnection = establish_connection();
+        let expected_entries: Vec<DiaryEntry> = diary_entries.order((creation_date.desc(), creation_time.desc())).load::<DiaryEntry>(&connection).unwrap();
+        let received_entries = fetch_all_diary_entries(&connection, true);
+        assert_eq!(received_entries, expected_entries);
     }
 
     use rocket_contrib::JSON;
     use all_diary_entries_controller;
     use std::ops::Deref;
     #[test]
-    fn test_all_diary_entries_controller_should_return_all_entries_in_json() {
+    fn test_all_diary_entries_controller_should_return_all_entries_in_json_ordered() {
+        /* the controller should return all the entries ordered by date and time desc */
         let connection: PgConnection = establish_connection();
-        let expected_entries: JSON<Vec<DiaryEntry>> = JSON(diary_entries.load::<DiaryEntry>(&connection).unwrap());
+        let expected_entries: JSON<Vec<DiaryEntry>> = JSON(diary_entries.order((creation_date.desc(), creation_time.desc())).load::<DiaryEntry>(&connection).unwrap());
         let response = all_diary_entries_controller();
         let received_entries = response.get_responder().deref().deref();
         assert_eq!(received_entries, expected_entries.into_inner().deref());
@@ -261,6 +279,7 @@ mod tests {
         let received_entries: &Vec<DiaryEntryMetaInfo> = response.get_responder().deref();
 
         assert_eq!(expected_entries.len(), received_entries.len());
+        // assert each entry one by one
         for i in 0..expected_entries.len() {
             let ref exp_entry: DiaryEntry = expected_entries[i];
             let ref rec_entry: DiaryEntryMetaInfo = received_entries[i];
@@ -268,7 +287,6 @@ mod tests {
             assert_eq!(rec_entry.title, exp_entry.title);
             assert_eq!(rec_entry.url, exp_entry.get_react_url());
         }
-        // assert each entry one by one
     }
 }
 
