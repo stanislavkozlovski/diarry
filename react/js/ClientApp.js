@@ -4,6 +4,7 @@ import { HashRouter, Match } from 'react-router'
 
 import DiaryDetails from './DiaryDetails.js'
 import LandingPage from './Landing.js'
+import NewDiary from './NewDiary.js'
 import Sidebar from './Sidebar.js'
 import '../public/css/third-party/core-desktop.css'
 import '../public/css/third-party/core-1200px.css'
@@ -20,6 +21,7 @@ const App = React.createClass({
           <div id='wrapper'>
             <div id='content' className='mobileUI-main-content'>
               <div id='content-inner'>
+                <Match exactly pattern='/entry/new' component={NewDiary} />
                 <Match exactly pattern='/entry/:id' component={DiaryDetails} />
                 <Match exactly pattern='/' component={LandingPage} />
               </div>
@@ -31,6 +33,7 @@ const App = React.createClass({
     )
   }
 })
+
 
 render(
   (

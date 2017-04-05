@@ -20,7 +20,8 @@
     "react": "15.3.2",
     "react-dom": "15.3.2",
     "react-redux": "4.4.0",
-    "react-router": "4.0.0-alpha.5"
+    "react-router": "4.0.0-alpha.5",
+    "sweetalert-react": "^0.4.9"
   },
   "devDependencies": {
     "babel-core": "6.16.0",

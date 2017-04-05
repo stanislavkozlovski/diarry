@@ -7,7 +7,9 @@
 /*********************************************************************************/
 /* Basic                                                                         */
 /*********************************************************************************/
-
+	* {
+		box-sizing: border-box;
+	}
 	html
 	{
 		height: 100%;
@@ -146,6 +148,34 @@
 			font-size: 2em;
 			letter-spacing: 0.1em;
 		}
+
+	#newEntry
+	{
+		margin-top: 30px;
+		background-color: #16bf34;
+		background-image: url('images/bg1.png');
+		padding: 1.1em 0.5em 1.1em 0.5em;
+		border-radius: 0.4em;
+		text-align: center;
+		box-shadow: inset 0px 0px 0px 1px rgba(255,255,255,0.15), 0 0.025em 0.15em 0em rgba(0,0,0,0.25);
+		transition-duration: 0.5s;
+	}
+
+		#newEntry h1
+		{
+			font-family: 'Open Sans Condensed', sans-serif;
+			font-weight: 700;
+			color: #fff;
+			font-size: 1.3em;
+			letter-spacing: 0.1em;
+		}
+	#newEntry:hover {
+		cursor: pointer;
+		transform: scale(1.1);
+		-webkit-box-shadow: 0px 0px 37px 12px rgba(184,255,227,1);
+		-moz-box-shadow: 0px 0px 37px 12px rgba(184,255,227,1);
+		box-shadow: 0px 0px 33px 1px rgb(54, 229, 160);
+	}
 
 /*********************************************************************************/
 /* Nav                                                                           */
@@ -298,3 +328,58 @@
 			height: 0.5em;
 			margin: 0 0 2em 0;
 		}
+
+/*********************************************************************************/
+/* Input                                                                     */
+/*********************************************************************************/
+
+h1.new-entry {
+  font-size: 50px;
+}
+
+div.new-entry-header {
+  min-height: 150px;
+      display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.new-entry-title {
+  width: 100%;
+  line-height: 50px;
+      border: 1px solid #ccc;
+  padding-left: 20px;
+  font-size: 50px;
+}
+
+.new-entry-title:focus {
+  border-color: #66afe9;
+  outline: 0;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+}
+
+.new-entry-bad-title {
+  box-shadow: 0px 0px 26px 7px rgba(196, 50, 50, 0.37) !important;
+}
+
+textarea.entry-body
+{
+  width: 100%;
+    min-height: 802px;
+    border: 1px solid #EEEEEE;
+    box-shadow: 1px 1px 0 #DDDDDD;
+    display: block;
+    font-family: 'Marck Script',cursive;
+    font-size: 22px;
+    line-height: 50px;
+    margin: 2% auto;
+    padding: 11px 20px 0 70px;
+    resize: none;
+    height: 689px;
+    background-image: -moz-linear-gradient(top , transparent, transparent 49px,#E7EFF8 0px), -moz-radial-gradient(4% 50%, circle closest-corner, #f5f5f5, #f5f5f5 39%, transparent 0%), -moz-radial-gradient(3.9% 46% , circle closest-corner, #CCCCCC, #CCCCCC 43.5%, transparent 0%);
+    background-image: -webkit-linear-gradient(top , transparent, transparent 49px,#E7EFF8 0), -webkit-radial-gradient(4% 50%, circle closest-corner, #f5f5f5, #f5f5f5 39%, transparent 0%), -webkit-radial-gradient(3.9% 46%, circle closest-corner, #cccccc, #cccccc 43.5%, transparent 0%);
+
+    -webkit-background-size:  100% 50px;
+    background-size: 100% 50px;
+}

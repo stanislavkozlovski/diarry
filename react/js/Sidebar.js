@@ -8,8 +8,8 @@ const Sidebar = React.createClass({
       recentPosts: []
     }
   },
-  
-  componentDidMount() {
+
+  componentDidMount () {
     // load the last 5 posts
     axios.get('http://localhost:8000/api/entries/last_five')
       .then(resp => {
@@ -26,6 +26,11 @@ const Sidebar = React.createClass({
         <div id='logo'>
           <h1 className='mobileUI-site-name'>Username's Diary</h1>
         </div>
+        <Link to='/entry/new'>
+          <div id='newEntry'>
+            <h1 className='mobileUI-site-name'>New Entry</h1>
+          </div>
+        </Link>
         <nav id='nav' className='mobileUI-site-nav'>
           <ul>
             <li className='current_page_item'><a href='#'>Latest Post</a></li>

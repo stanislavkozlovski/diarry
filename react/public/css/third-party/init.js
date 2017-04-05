@@ -198,9 +198,9 @@
 		jQuery.fn.accelerate_5grid = function() { return jQuery(this).css('-webkit-transform', 'translateZ(0)').css('-webkit-backface-visibility', 'hidden').css('-webkit-perspective', '500'); }
 
 	// Determine base URL, settings
-		x = jQuery('script').filter(function() { return this.src.match(/5grid\/init\.js/); }).first();
+		x = jQuery('script').filter(function() { return this.src.match(/third-party\/init\.js/); }).first();
 		y = x.attr('src').split('?');
-		baseURL = y[0].replace(/5grid\/init\.js/, '');
+		baseURL = y[0].replace(/third-party\/init\.js/, '');
 
 		// Override settings
 			if (y.length > 1)
