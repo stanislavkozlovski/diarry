@@ -54,6 +54,16 @@ pub fn fetch_diary_entry(conn: &PgConnection, id: i32) -> Option<DiaryEntry> {
     }
 }
 
+pub fn fetch_last_five_diary_entries(conn: &PgConnection) -> Vec<DiaryEntry> {
+    /* Query the database for the last 5 DiaryEntries and return them sorted by their creation date descending (newest first) */
+    use self::schema::diary_entries::dsl::diary_entries;
+    use self::schema::diary_entries::dsl::{creation_date, creation_time};
+    
+    
+    let result = diary_entries.order((creation_date.desc(), creation_time.desc())).limit(5).load::<DiaryEntry>(conn).unwrap();
+    return result;
+}
+
 pub fn fetch_all_diary_entries(conn: &PgConnection) -> Vec<DiaryEntry> {
     /* Returns a Vector of all the Diary Entries*/
     use self::schema::diary_entries::dsl::diary_entries;
@@ -194,4 +204,36 @@ mod tests {
         let received_entries = response.get_responder().deref().deref();
         assert_eq!(received_entries, expected_entries.into_inner().deref());
     }
+
+    use fetch_last_five_diary_entries;
+    #[test]
+    fn test_fetch_last_five_diary_entries_should_be_sorted_and_not_more_than_five() {
+        let connection: PgConnection = establish_connection();
+        let received_entries: Vec<DiaryEntry> = fetch_last_five_diary_entries(&connection);
+
+        assert!(received_entries.len() <= 5);
+        // assert that each one's date/time is bigger than the next
+        for i in 0..received_entries.len() {
+            let ref newer_entry: DiaryEntry = received_entries[i];
+            for j in i+1..received_entries.len() {
+                let ref older_entry: DiaryEntry = received_entries[j];
+                if newer_entry.date == older_entry.date {
+                    assert!(newer_entry.time >= older_entry.time);
+                } else {
+                    assert!(newer_entry.date > older_entry.date);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_fetch_last_five_diary_entries_should_return_expected() {
+        use schema::diary_entries::dsl::{creation_date, creation_time};
+        let connection: PgConnection = establish_connection();
+        let received_entries: Vec<DiaryEntry> = fetch_last_five_diary_entries(&connection);
+        let expected_entries: Vec<DiaryEntry> = diary_entries.order((creation_date.desc(), creation_time.desc())).limit(5).load::<DiaryEntry>(&connection).unwrap();
+
+        assert_eq!(received_entries, expected_entries);
+    }
 }
+
