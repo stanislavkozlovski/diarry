@@ -1,6 +1,8 @@
 import React from 'react'
+import axios from 'axios'
 
 import '../public/login-style.css'
+import Auth from './auth.js'
 
 const Login = React.createClass({
   handleEmailInput (event) {
@@ -18,6 +20,16 @@ const Login = React.createClass({
     let password = this.state.password
 
     // TODO: POST credentials to server and await response
+    axios.post('http://localhost:8000/api/authenticate', { email, password }).then(resp => {
+      // successful login, save the token and redirect to the homepage
+      let authToken = resp.data.authToken
+      console.log(`Authenticated with ${authToken}`)
+
+      Auth.authenticateUser(authToken)
+      this.context.router.transitionTo('/')
+    }).catch(err => {
+      console.log(err)
+    })
   },
 
   render () {
