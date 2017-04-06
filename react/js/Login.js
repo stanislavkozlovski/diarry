@@ -17,7 +17,7 @@ const Login = React.createClass({
   },
 
   handlePassInput (event) {
-    this.setState({pass: event.target.value})
+    this.setState({password: event.target.value})
   },
 
   handleLogIn (event) {
@@ -25,11 +25,11 @@ const Login = React.createClass({
 
     let email = this.state.email
     let password = this.state.password
-
     // TODO: POST credentials to server and await response
+    // TODo: Add some sort of loading
     axios.post('http://localhost:8000/api/authenticate', { email, password }).then(resp => {
       // successful login, save the token and redirect to the homepage
-      let authToken = resp.data.authToken
+      let authToken = resp.data
       console.log(`Authenticated with ${authToken}`)
 
       Auth.authenticateUser(authToken)
@@ -55,7 +55,7 @@ const Login = React.createClass({
                 <input type='text' name='email' placeholder='E-mail' required onChange={this.handleEmailInput} /></p>
               <p>
                 <span className='fontawesome-lock' />
-                <input type='password' name='pass' placeholder='Password' required onChange={this.handlePassInput} /></p>
+                <input type='password' name='password' placeholder='Password' required onChange={this.handlePassInput} /></p>
               <p><input type='submit' value='Sign In' /></p>
             </fieldset>
           </form>

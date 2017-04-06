@@ -70,6 +70,6 @@ pub struct NewDiaryOwner {
 pub struct DiaryOwner {
     id: i32,
     email: String,
-    password: String,
+    pub password: String,
     jwt: Option<String>
 }
