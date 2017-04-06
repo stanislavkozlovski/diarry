@@ -3,8 +3,15 @@ import axios from 'axios'
 
 import '../public/login-style.css'
 import Auth from './auth.js'
+import { Redirect } from 'react-router'
 
 const Login = React.createClass({
+  getInitialState () {
+    return {
+      redirectTo: ''
+    }
+  },
+
   handleEmailInput (event) {
     this.setState({email: event.target.value})
   },
@@ -27,13 +34,17 @@ const Login = React.createClass({
 
       Auth.authenticateUser(authToken)
       document.body.classList.remove('login-page')  // Clear the styles from the login page !
-      this.context.router.transitionTo('/')
+      this.setState({ redirectTo: '/' })  // trigger redirect
     }).catch(err => {
       console.log(err)
     })
   },
 
   render () {
+    if (this.state && this.state.redirectTo) {
+      return <Redirect to={this.state.redirectTo} />
+    }
+
     return (
       <div className='login'>
         <div id='login'>

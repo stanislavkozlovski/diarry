@@ -13,6 +13,7 @@ import '../public/css/third-party/core-noscript.css'
 import '../public/css/third-party/core.css'
 import '../public/css/style-desktop.css'
 import '../public/css/style-1200px.css'
+import '../public/css/style.css'
 import Login from './Login.js'
 
 const App = React.createClass({
@@ -22,20 +23,18 @@ const App = React.createClass({
     }
 
     return (
-      <HashRouter>
-        <div className='app'>
-          <div id='wrapper'>
-            <div id='content' className='mobileUI-main-content'>
-              <div id='content-inner'>
-                <Match exactly pattern='/entry/new' component={NewDiary} />
-                <Match exactly pattern='/entry/:id' component={DiaryDetails} />
-                <Match exactly pattern='/' component={LandingPage} />
-              </div>
+      <div className='app'>
+        <div id='wrapper'>
+          <div id='content' className='mobileUI-main-content'>
+            <div id='content-inner'>
+              <Match exactly pattern='/entry/new' component={NewDiary} />
+              <Match exactly pattern='/entry/:id' component={DiaryDetails} />
+              <Match exactly pattern='/' component={LandingPage} />
             </div>
-            <Sidebar />
           </div>
+          <Sidebar />
         </div>
-      </HashRouter>
+      </div>
     )
   }
 })
@@ -44,7 +43,9 @@ const App = React.createClass({
 render(
   (
   <div>
-    <App />
+    <HashRouter>
+      <App />
+    </HashRouter>
   </div>
   ), document.getElementById('app')
 )
