@@ -1,4 +1,5 @@
 import React from 'react'
+import axios from 'axios'
 import SweetAlert from 'sweetalert-react'
 
 const NewDiary = React.createClass({
@@ -38,19 +39,28 @@ const NewDiary = React.createClass({
   },
 
   handleBodyInput (event) {
-    this.setState({title: event.target.value})
+    this.setState({body: event.target.value})
   },
 
   handleNewDiarySubmit (event) {
     event.preventDefault()
     let diaryTitle = this.state.title
     let diaryBody = this.state.body
-
+    
     if (diaryTitle.length <= 5) {
       this.state.showAlert = true
       this.setState({ showAlert: true, alertTitle: 'Title Too Short!', alertDesc: 'The title you entered is shorter than 5 characters!' })
     } else if (diaryBody.length <= 10) {
       this.setState({ showAlert: true, alertTitle: 'Content Too Short!', alertDesc: "Your entry's content is shorter than 10 characters!" })
+    } else {
+      axios.post('http://localhost:8000/api/entries/new', {
+        title: this.state.title,
+        body: this.state.body
+      }).then(resp => {
+        console.log(resp)
+      }).catch(err => {
+        console.log(`Error: ${err}`)
+      })
     }
   },
 
@@ -70,7 +80,7 @@ const NewDiary = React.createClass({
             <h1 className='new-entry'>New Entry</h1>
           </div>
           <input name='title' placeholder='The title of your entry' className={titleClass} onChange={this.handleTitleInput} />
-          <textarea name='body' className='entry-body' onChange={this.handleBoddyInput} />
+          <textarea name='body' className='entry-body' onChange={this.handleBodyInput} />
         </form>
       </section>
     )
