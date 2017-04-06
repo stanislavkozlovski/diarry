@@ -3,4 +3,5 @@ CREATE TABLE diary_entries (
   title VARCHAR NOT NULL,
   body TEXT NOT NULL,
   creation_date DATE NOT NULL DEFAULT CURRENT_DATE,
-  creation_time TIME NOT NULL DEFAULT CURRENT_TIME)
+  creation_time TIME NOT NULL DEFAULT CURRENT_TIME
+)

@@ -1,7 +1,7 @@
 extern crate chrono;
 extern crate diesel;
 extern crate rocket_contrib;
-use super::schema::diary_entries;
+use super::schema::{ diary_owner, diary_entries };
 use self::chrono::{NaiveDate, NaiveTime};
 
  
@@ -53,4 +53,23 @@ pub struct DiaryEntryMetaInfo {
 #[derive(Deserialize)]
 pub struct ErrorDetails {
     pub error_message: String
+}
+
+#[derive(Debug)]
+#[derive(Serialize)]
+#[derive(Deserialize)]
+#[derive(Insertable)]
+#[table_name="diary_owner"]
+pub struct NewDiaryOwner {
+    pub email: String,
+    pub password: String,
+}
+
+#[derive(Debug)]
+#[derive(Queryable)]
+pub struct DiaryOwner {
+    id: i32,
+    email: String,
+    password: String,
+    jwt: Option<String>
 }
