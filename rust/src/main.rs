@@ -22,11 +22,12 @@ use rocket::response::status;
 use rocket::response::status::{Created};
 use rocket::response::content;
 use rocket_contrib::JSON;
-use rocket::http::hyper::header::{Headers, AccessControlAllowOrigin};
+use rocket::http::hyper::header::{Headers, AccessControlAllowOrigin, AccessControlAllowHeaders};
 use rocket::http::{Status, ContentType};
+use rocket::http::Method;
 use rocket::Response;
 
-use cors::{CORS};
+use cors::{CORS, PreflightCORS};
 use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo};
 
 
@@ -86,15 +87,26 @@ pub fn establish_connection() -> PgConnection {
 }
 
 #[post("/api/entries/new", format = "application/json", data = "<new_entry>")]
-fn new_diary_controller(new_entry: JSON<NewDiaryEntry>) -> Result<Created<JSON<DiaryEntry>>, status::Custom<JSON<ErrorDetails>>>{
-    if new_entry.body.len() <= 3 || new_entry.title.len() <= 3 {
-        let json_err = JSON(ErrorDetails{ error_message: String::from("The length of the body and title must be greater than 3 characters!") });
-        return Err(status::Custom(Status::BadRequest, json_err));
+fn new_diary_controller(new_entry: JSON<NewDiaryEntry>) -> CORS<Result<JSON<DiaryEntryMetaInfo>, JSON<ErrorDetails>>> {
+    if new_entry.body.len() <= 5 || new_entry.title.len() <= 10 {
+        let json_err = JSON(ErrorDetails{ error_message: String::from("The length of the body and title must be greater than 5 and 10 characters!") });
+        return CORS::any(Err(json_err))
+            .status(Status::BadRequest);
     }
     let new_entry: DiaryEntry = create_diary_entry(&establish_connection(), new_entry.title.as_str(), new_entry.body.as_str());
+    let json_entry_meta_info = JSON(DiaryEntryMetaInfo { title: new_entry.title.clone(), url: new_entry.get_react_url() });
 
-    Ok(Created(new_entry.get_absolute_url(), None))
+    CORS::any(Ok(json_entry_meta_info))
+        .status(Status::Created)
 }
+#[route(OPTIONS, "/api/entries/new")]
+fn cors_preflight() -> PreflightCORS {
+    CORS::preflight("*")
+        .methods(&vec![Method::Options, Method::Post])
+        .credentials(true)
+        .headers(&vec!["Content-Type"])
+}
+
 
 #[get("/api/entries/<id>")]
 fn diary_details_controller<'a>(id: i32) -> Response<'static> {
@@ -147,7 +159,7 @@ fn last_five_diary_entries_controller() -> CORS<JSON<Vec<DiaryEntryMetaInfo>>> {
 
 fn main() {
     rocket::ignite()
-        .mount("/", routes![new_diary_controller, diary_details_controller, all_diary_entries_controller, last_five_diary_entries_controller])
+        .mount("/", routes![new_diary_controller, diary_details_controller, all_diary_entries_controller, last_five_diary_entries_controller, cors_preflight])
         .launch();
 }
 
