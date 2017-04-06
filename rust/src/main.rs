@@ -6,11 +6,15 @@ extern crate rocket;
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_codegen;
 extern crate dotenv;
+extern crate djangohashers;
+extern crate crypto;
+extern crate jwt;
 
 pub mod models;
 pub mod schema;
 pub mod cors;
-extern crate jwt;
+pub mod helpers;
+pub mod db_queries;
 
 use std::env;
 use std::io::Cursor;
@@ -18,106 +22,20 @@ use std::io::Cursor;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use dotenv::dotenv;
+use djangohashers::{check_password, make_password_with_algorithm, Algorithm};
 
 use rocket::response::status;
-use rocket::response::status::{Created};
-use rocket::response::content;
 use rocket_contrib::JSON;
 use rocket::http::hyper::header::{Headers, AccessControlAllowOrigin, AccessControlAllowHeaders};
 use rocket::http::{Status, ContentType};
 use rocket::http::Method;
 use rocket::Response;
-use std::default::Default;
-use crypto::sha2::Sha256;
-use jwt::{
-    Header,
-    Registered,
-    Token,
-};
+
 use cors::{CORS, PreflightCORS};
 use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo, DiaryOwner, NewDiaryOwner};
-extern crate djangohashers;
-extern crate crypto;
-// Or, just what you need:
-use djangohashers::{check_password, make_password_with_algorithm, Algorithm};
 
-pub fn create_diary_entry<'a>(conn: &PgConnection, title: &'a str, body: &'a str) -> DiaryEntry {
-    /* Creates a new DiaryEntry in the database */
-    use schema::diary_entries;
 
-    let new_entry = NewDiaryEntry {
-        title: String::from(title),
-        body: String::from(body),
-    };
 
-    diesel::insert(&new_entry).into(diary_entries::table)
-        .get_result(conn)
-        .expect("Error saving new post")
-}
-
-pub fn fetch_diary_entry(conn: &PgConnection, id: i32) -> Option<DiaryEntry> {
-    /* Given the ID, queries the database for a DiaryEntry row and returns a DiaryEntry struct */
-    use self::schema::diary_entries::dsl::diary_entries;
-    let result = diary_entries.find(id).first(conn);
-    match result {
-        Ok(r) => Some(r),
-        Err(r) => None
-    }
-}
-
-pub fn fetch_last_five_diary_entries(conn: &PgConnection) -> Vec<DiaryEntry> {
-    /* Query the database for the last 5 DiaryEntries and return them sorted by their creation date descending (newest first) */
-    use self::schema::diary_entries::dsl::diary_entries;
-    use self::schema::diary_entries::dsl::{creation_date, creation_time};
-    
-    
-    let result = diary_entries.order((creation_date.desc(), creation_time.desc())).limit(5).load::<DiaryEntry>(conn).unwrap();
-    return result;
-}
-
-pub fn fetch_all_diary_entries(conn: &PgConnection, order_by_date: bool) -> Vec<DiaryEntry> {
-    /* Returns a Vector of all the Diary Entries
-       param: order_by_date - if set, returns them ordered by their date and time descending
-    */
-    use self::schema::diary_entries::dsl::diary_entries;
-    
-    if order_by_date {
-        use self::schema::diary_entries::dsl::{creation_date, creation_time};
-        return diary_entries.order((creation_date.desc(), creation_time.desc())).load::<DiaryEntry>(conn).unwrap()
-    } else {
-        return diary_entries.load::<DiaryEntry>(conn).unwrap();
-    }
-}
-
-pub fn seed_diary_owner() {
-    use schema::diary_owner;
-
-    let conn: PgConnection = establish_connection();
-    let potential_owner: QueryResult<DiaryOwner> = diary_owner::dsl::diary_owner.find(1).first(&conn);
-    if potential_owner.is_ok() {
-        // Do not seed if an owner already exists
-        return;
-    }
-
-    if let (Ok(email),Ok(password)) = (env::var("EMAIL"), env::var("PASSWORD")) {
-        if (email.len() == 0 || password.len() == 0) {
-            panic!("EMAIL or PASSWORD environment variables are set but empty! Please configure them in your .env file.")
-        }
-        let hashed_pwd = make_password_with_algorithm(&password.to_string(), Algorithm::BCryptSHA256);
-        // convert to temp structure for easy inserting into DB
-        let seeded_diary_owner = NewDiaryOwner { email: String::from(email), password: String::from(hashed_pwd) };
-        // diesel::insert(&seeded_diary_owner).into(diary_owner::table)
-                                        // .execute(&conn)
-                                        // .expect("Error seeding owner");
-    } else {
-        panic!("EMAIL or PASSWORD environment variables are not set! Please configure them in your .env file.")
-    }
-}
-
-pub fn establish_connection() -> PgConnection {
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url))
-}
 
 #[post("/api/entries/new", format = "application/json", data = "<new_entry>")]
 fn new_diary_controller(new_entry: JSON<NewDiaryEntry>) -> CORS<Result<JSON<DiaryEntryMetaInfo>, JSON<ErrorDetails>>> {
@@ -126,7 +44,7 @@ fn new_diary_controller(new_entry: JSON<NewDiaryEntry>) -> CORS<Result<JSON<Diar
         return CORS::any(Err(json_err))
             .status(Status::BadRequest);
     }
-    let new_entry: DiaryEntry = create_diary_entry(&establish_connection(), new_entry.title.as_str(), new_entry.body.as_str());
+    let new_entry: DiaryEntry = db_queries::create_diary_entry(&db_queries::establish_connection(), new_entry.title.as_str(), new_entry.body.as_str());
     let json_entry_meta_info = JSON(DiaryEntryMetaInfo { title: new_entry.title.clone(), url: new_entry.get_react_url() });
 
     CORS::any(Ok(json_entry_meta_info))
@@ -144,7 +62,7 @@ fn cors_preflight() -> PreflightCORS {
 
 #[get("/api/entries/<id>")]
 fn diary_details_controller<'a>(id: i32) -> Response<'static> {
-    let diary_entry: Option<DiaryEntry> = fetch_diary_entry(&establish_connection(), id);
+    let diary_entry: Option<DiaryEntry> = db_queries::fetch_diary_entry(&db_queries::establish_connection(), id);
 
     if diary_entry.is_none() {
         let error_message = ErrorDetails{ error_message: String::from(format!("Could not find a Diary Entry with ID {}", id)) };
@@ -173,15 +91,15 @@ fn diary_details_controller<'a>(id: i32) -> Response<'static> {
 #[get("/api/entries/all")]
 fn all_diary_entries_controller() -> CORS<JSON<Vec<DiaryEntry>>> {
     /* Return all the Diary Entries, ordered by their date descending */
-    let connection: PgConnection = establish_connection();
-    CORS::any(JSON(fetch_all_diary_entries(&connection, true)))
+    let connection: PgConnection = db_queries::establish_connection();
+    CORS::any(JSON(db_queries::fetch_all_diary_entries(&connection, true)))
 }
 
 #[get("/api/entries/last_five")]
 fn last_five_diary_entries_controller() -> CORS<JSON<Vec<DiaryEntryMetaInfo>>> {
     /* Returns meta information about the last five diary entries */
-    let connection: PgConnection = establish_connection();
-    let last_five_entries: Vec<DiaryEntry> = fetch_last_five_diary_entries(&connection);
+    let connection: PgConnection = db_queries::establish_connection();
+    let last_five_entries: Vec<DiaryEntry> = db_queries::fetch_last_five_diary_entries(&connection);
     let mut entries_meta: Vec<DiaryEntryMetaInfo> = Vec::new();
     // fill up the entries
     for entry in last_five_entries {
@@ -194,7 +112,7 @@ fn last_five_diary_entries_controller() -> CORS<JSON<Vec<DiaryEntryMetaInfo>>> {
 #[post("/api/authenticate", format = "application/json", data = "<owner>")]
 fn login_auth_controller(owner: JSON<NewDiaryOwner>) -> CORS<String>{
     use schema::diary_owner::dsl::{diary_owner, email, password, jwt_token};
-    let conn = establish_connection();
+    let conn = db_queries::establish_connection();
 
     // fetch the diary_owner with the email address and authenticate their passwords match
     let result = diary_owner.filter(email.eq(owner.email.clone())).select(password).first(&conn);
@@ -207,29 +125,10 @@ fn login_auth_controller(owner: JSON<NewDiaryOwner>) -> CORS<String>{
     }
 
     // successful login, generate jwt, save it to the DB and return it back 
-    let gen_jwt: String = generate_jwt_token(owner.email.clone());
+    let gen_jwt: String = helpers::generate_jwt_token(owner.email.clone());
     diesel::update(diary_owner.filter(email.eq(owner.email.clone()))).set(jwt_token.eq(gen_jwt.clone())).execute(&conn);
 
     return CORS::any(gen_jwt);
-}
-
-fn generate_jwt_token(email: String) -> String {
-    let header: Header = Default::default();
-    // TODO: iss, exp, iat etc
-    let claims = Registered {
-        sub: Some(email),
-        ..Default::default()
-    };
-
-    let token = Token::new(header, claims);
-    // Sign the token
-    // TODO: Secret key
-    if let Err(e) = env::var("SECRET_KEY") {
-        panic!("Your SECRET_KEY environment variable is not set! Please configure it in your .env file.")
-    }
-    let secret_key: String = env::var("SECRET_KEY").ok().unwrap();
-    let gen_jwt = token.signed("secret".as_bytes(), Sha256::new()).unwrap();
-    gen_jwt
 }
 
 #[route(OPTIONS, "/api/authenticate")]
@@ -242,7 +141,7 @@ fn cors_preflight_auth() -> PreflightCORS {
 
 fn main() {
     dotenv().ok();
-    seed_diary_owner();
+    db_queries::seed_diary_owner();
     rocket::ignite()
         .mount("/", routes![new_diary_controller, diary_details_controller, all_diary_entries_controller, last_five_diary_entries_controller, cors_preflight, cors_preflight_auth, login_auth_controller])
         .launch();
@@ -251,7 +150,7 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use dotenv::dotenv;
-    use establish_connection;
+    use db_queries::establish_connection;
     
     #[test]
     fn test_connects_to_db() {
@@ -261,7 +160,8 @@ mod tests {
     }
     extern crate serde_json;
 
-    use {fetch_diary_entry, diary_details_controller};
+    use db_queries::fetch_diary_entry;
+    use diary_details_controller;
     #[test]
     fn test_details_should_return_correct_entry_and_200() {
         dotenv().ok();
@@ -310,7 +210,7 @@ mod tests {
         assert!(fetch_diary_entry(&connection, i32::max_value()).is_none());
     }
 
-    use fetch_all_diary_entries;
+    use db_queries::fetch_all_diary_entries;
     use schema::diary_entries::dsl::{creation_date, creation_time};
     #[test]
     fn test_fetch_all_diary_entries_should_return_them_all() {
@@ -344,7 +244,7 @@ mod tests {
         assert_eq!(received_entries, expected_entries.into_inner().deref());
     }
 
-    use fetch_last_five_diary_entries;
+    use db_queries::fetch_last_five_diary_entries;
     #[test]
     fn test_fetch_last_five_diary_entries_should_be_sorted_and_not_more_than_five() {
         dotenv().ok();
