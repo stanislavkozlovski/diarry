@@ -14,3 +14,4 @@ chrono = { version = "0.3", features = ["serde", "rustc-serialize"] }
 serde_derive = "0.9.12"
 serde = "0.9.12"
 serde_json = "0.9"
+djangohashers = "0.2"

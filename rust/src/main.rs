@@ -28,8 +28,11 @@ use rocket::http::Method;
 use rocket::Response;
 
 use cors::{CORS, PreflightCORS};
-use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo};
+use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo, DiaryOwner, NewDiaryOwner};
+extern crate djangohashers;
 
+// Or, just what you need:
+use djangohashers::{check_password, make_password_with_algorithm, Algorithm};
 
 pub fn create_diary_entry<'a>(conn: &PgConnection, title: &'a str, body: &'a str) -> DiaryEntry {
     /* Creates a new DiaryEntry in the database */
@@ -70,12 +73,37 @@ pub fn fetch_all_diary_entries(conn: &PgConnection, order_by_date: bool) -> Vec<
        param: order_by_date - if set, returns them ordered by their date and time descending
     */
     use self::schema::diary_entries::dsl::diary_entries;
-
+    
     if order_by_date {
         use self::schema::diary_entries::dsl::{creation_date, creation_time};
         return diary_entries.order((creation_date.desc(), creation_time.desc())).load::<DiaryEntry>(conn).unwrap()
     } else {
         return diary_entries.load::<DiaryEntry>(conn).unwrap();
+    }
+}
+
+pub fn seed_diary_owner() {
+    use schema::diary_owner;
+
+    let conn: PgConnection = establish_connection();
+    let potential_owner: QueryResult<DiaryOwner> = diary_owner::dsl::diary_owner.find(1).first(&conn);
+    if potential_owner.is_ok() {
+        // Do not seed if an owner already exists
+        return;
+    }
+
+    if let (Ok(email),Ok(password)) = (env::var("EMAIL"), env::var("PASSWORD")) {
+        if (email.len() == 0 || password.len() == 0) {
+            panic!("EMAIL or PASSWORD environment variables are set but empty! Please configure them in your .env file.")
+        }
+        let hashed_pwd = make_password_with_algorithm(&password.to_string(), Algorithm::BCryptSHA256);
+        // convert to temp structure for easy inserting into DB
+        let seeded_diary_owner = NewDiaryOwner { email: String::from(email), password: String::from(hashed_pwd) };
+        diesel::insert(&seeded_diary_owner).into(diary_owner::table)
+                                        .get_result::<DiaryOwner>(&conn)
+                                        .expect("Error seeding owner");
+    } else {
+        panic!("EMAIL or PASSWORD environment variables are not set! Please configure them in your .env file.")
     }
 }
 
@@ -158,6 +186,7 @@ fn last_five_diary_entries_controller() -> CORS<JSON<Vec<DiaryEntryMetaInfo>>> {
 }
 
 fn main() {
+    seed_diary_owner();
     rocket::ignite()
         .mount("/", routes![new_diary_controller, diary_details_controller, all_diary_entries_controller, last_five_diary_entries_controller, cors_preflight])
         .launch();
@@ -300,5 +329,16 @@ mod tests {
             assert_eq!(rec_entry.url, exp_entry.get_react_url());
         }
     }
+
+    // use seed_diary_owner;
+    // use std::env;
+    // #[test]
+    // #[should_panic(expected = "EMAIL or PASSWORD environment variables are set but empty! Please configure them in your .env file.")]
+    // fn test_seed_diary_owner_no_email_env_var_should_panic() {
+    //     env::set_var("EMAIL", "");
+    //     env::set_var("PASSWORD", "");
+        
+    //     seed_diary_owner()
+    // }
 }
 
