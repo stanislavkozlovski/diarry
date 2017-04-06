@@ -21,7 +21,7 @@
        box-sizing: border-box;
 }
 
-body {
+body.login-page {
   background: #2c3338 !important;
   color: #606468 !important;
   font: 87.5%/1.5em 'Open Sans', sans-serif !important;

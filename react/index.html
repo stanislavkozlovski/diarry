@@ -28,5 +28,9 @@
         React has not yet rendered
     </div>
     <script src="/public/bundle.js"></script>
+    <script>
+        // hack to style the body a certain way when we're at the login page
+        $( "body:has(#login)" ).addClass( "login-page" );
+    </script>
 </body>
 </html>

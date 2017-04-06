@@ -26,6 +26,7 @@ const Login = React.createClass({
       console.log(`Authenticated with ${authToken}`)
 
       Auth.authenticateUser(authToken)
+      document.body.classList.remove('login-page')  // Clear the styles from the login page !
       this.context.router.transitionTo('/')
     }).catch(err => {
       console.log(err)
