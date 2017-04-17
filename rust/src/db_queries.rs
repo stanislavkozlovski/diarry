@@ -7,6 +7,8 @@ use diesel::prelude::*;
 use std::env;   
 use self::schema::diary_entries::dsl::{creation_date, creation_time};
 use self::schema::diary_entries::dsl::diary_entries;
+use schema::diary_owner::dsl::{diary_owner, jwt_token};
+
 use djangohashers::{check_password, make_password_with_algorithm, Algorithm};
 
 pub fn establish_connection() -> PgConnection {
@@ -52,6 +54,17 @@ pub fn create_diary_entry<'a>(conn: &PgConnection, title: &'a str, body: &'a str
     diesel::insert(&new_entry).into(diary_entries::table)
         .get_result(conn)
         .expect("Error saving new post")
+}
+
+pub fn fetch_user_with_jwt(conn: &PgConnection, given_jwt: String) -> Option<DiaryOwner> {
+    if given_jwt.len() < 1 {
+        return None
+    }
+    let result = diary_owner.filter(jwt_token.eq(given_jwt.clone())).first(conn);
+    match result {
+        Ok(r) => Some(r),
+        Err(r) => None
+    }
 }
 
 pub fn seed_diary_owner() {

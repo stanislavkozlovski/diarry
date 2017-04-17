@@ -305,6 +305,26 @@ mod tests {
         assert!(!env::var("SECRET_KEY").ok().is_none());  // should not panic
     }
 
+    use db_queries::fetch_user_with_jwt;
+    #[test]
+    fn test_fetch_user_with_empty_jwt_returns_none() {
+        dotenv().ok();
+        let connection: PgConnection = establish_connection();
+        assert!(fetch_user_with_jwt(&connection, String::from("")).is_none());
+    }
+    use schema::diary_owner::dsl::{diary_owner};
+    use models::DiaryOwner;
+    #[test]
+    fn test_fetch_user_with_jwt_returns_user() {
+        dotenv().ok();
+        let connection: PgConnection = establish_connection();
+
+        let real_owner: DiaryOwner = diary_owner.find(1).first(&connection).ok().unwrap();
+        let received_owner: Option<DiaryOwner> = fetch_user_with_jwt(&connection, real_owner.jwt.clone().unwrap());
+        assert!(received_owner.is_some());
+        assert_eq!(real_owner, received_owner.unwrap());
+    }
+
     // use seed_diary_owner;
     // #[test]
     // #[should_panic(expected = "EMAIL or PASSWORD environment variables are set but empty! Please configure them in your .env file.")]

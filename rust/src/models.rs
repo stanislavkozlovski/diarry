@@ -71,5 +71,11 @@ pub struct DiaryOwner {
     id: i32,
     email: String,
     pub password: String,
-    jwt: Option<String>
+    pub jwt: Option<String>
+}
+
+impl PartialEq for DiaryOwner {
+    fn eq(&self, other: &DiaryOwner) -> bool {
+        return self.id == other.id;
+    }
 }
