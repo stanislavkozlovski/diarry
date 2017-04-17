@@ -1,6 +1,7 @@
 import React from 'react'
 import axios from 'axios'
 import DiaryEntry from './DiaryEntry.js'
+import {getDiaryEntryDetails} from './requests.js'
 const { shape, string } = React.PropTypes
 // maybe turn into a stateless component and have a higher comp do AJAX :)
 const DiaryDetails = React.createClass({
@@ -14,19 +15,10 @@ const DiaryDetails = React.createClass({
     // TODO: Maybe add some sort of animation
 
     /* query the backend for details for a specific DiaryEntry and show it to the user */
-    axios.get(`http://localhost:8000/api/entries/${nextProps.params.id}`)
-    .then(resp => {
-      this.setState(resp.data)
+    getDiaryEntryDetails(nextProps.params.id).then(data => {
+      this.setState(data)
     }).catch(err => {
-      if (err.response) {
-        if (err.response.status === 404) {
-          this.setState({error: `No entry with ID ${nextProps.params.id} exists!`})
-        } else {
-          console.log(`Unexpected error: ${err}`)
-        }
-      } else {
-        console.log(`Unexpected error: ${err}`)
-      }
+      this.setState({error: err.message})
     })
   },
 
