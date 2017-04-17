@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router'
-import axios from 'axios'
+import {getLastFiveDiaryEntryMetaData} from './requests.js'
 
 import InfiniteCalendar from 'react-infinite-calendar'
 import 'react-infinite-calendar/styles.css'
@@ -15,13 +15,11 @@ const Sidebar = React.createClass({
 
   componentDidMount () {
     // load the last 5 posts
-    axios.get('http://localhost:8000/api/entries/last_five')
-      .then(resp => {
-        this.setState({recentPosts: resp.data})
-        console.log(resp.data)
-      }).catch(err => {
-        console.log(`Unexpected error: ${err}`)
-      })
+    getLastFiveDiaryEntryMetaData().then(recentPosts => {
+      this.setState({recentPosts})
+    }).catch(err => {
+      console.log(err)
+    })
   },
 
   handleShowCalendar () {

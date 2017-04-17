@@ -109,7 +109,7 @@ fn all_diary_entries_controller(owner: DiaryOwner) -> CORS<JSON<Vec<DiaryEntry>>
 }
 
 #[get("/api/entries/last_five")]
-fn last_five_diary_entries_controller() -> CORS<JSON<Vec<DiaryEntryMetaInfo>>> {
+fn last_five_diary_entries_controller(owner: DiaryOwner) -> CORS<JSON<Vec<DiaryEntryMetaInfo>>> {
     /* Returns meta information about the last five diary entries */
     let connection: PgConnection = db_queries::establish_connection();
     let last_five_entries: Vec<DiaryEntry> = db_queries::fetch_last_five_diary_entries(&connection);
