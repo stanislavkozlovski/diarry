@@ -139,11 +139,19 @@ fn cors_preflight_auth() -> PreflightCORS {
         .headers(&vec!["Content-Type"])
 }
 
+
+#[error(401)]
+fn fallback_unauthenticated() -> CORS<JSON<ErrorDetails>> {
+    let json_err = JSON(ErrorDetails{ error_message: String::from("Missing or Invalid JWT Token in the 'jwt-auth' header!") });
+    return CORS::any(json_err).status(Status::Unauthorized);
+}
+
 fn main() {
     dotenv().ok();
     db_queries::seed_diary_owner();
     rocket::ignite()
         .mount("/", routes![new_diary_controller, diary_details_controller, all_diary_entries_controller, last_five_diary_entries_controller, cors_preflight, cors_preflight_auth, login_auth_controller])
+        .catch(errors![fallback_unauthenticated])
         .launch();
 }
 
