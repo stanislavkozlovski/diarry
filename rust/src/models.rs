@@ -1,8 +1,14 @@
 extern crate chrono;
 extern crate diesel;
 extern crate rocket_contrib;
+use rocket::Outcome;
+use rocket::http::Status;
+use rocket::request::{self, Request, FromRequest};
 use super::schema::{ diary_owner, diary_entries };
 use self::chrono::{NaiveDate, NaiveTime};
+
+// pub mod db_queries;
+use db_queries::{ establish_connection, fetch_user_with_jwt };
 
  
 #[derive(Debug)]
@@ -77,5 +83,26 @@ pub struct DiaryOwner {
 impl PartialEq for DiaryOwner {
     fn eq(&self, other: &DiaryOwner) -> bool {
         return self.id == other.id;
+    }
+}
+
+
+impl<'a, 'r> FromRequest<'a, 'r> for DiaryOwner {
+    type Error = ();
+
+    fn from_request(request: &'a Request<'r>) -> request::Outcome<DiaryOwner, ()> {
+        let keys: Vec<_> = request.headers().get("jwt-auth").collect();
+        if keys.len() != 1 {
+            return Outcome::Failure((Status::Unauthorized, ()));
+        }
+
+        let given_jwt = keys[0];
+        // try to fetch a user with that JWT Token
+        let potential_owner: Option<DiaryOwner> = fetch_user_with_jwt(&establish_connection(), String::from(given_jwt));
+        if potential_owner.is_none() {
+            return Outcome::Failure((Status::Unauthorized, ()));
+        }
+
+        return Outcome::Success(potential_owner.unwrap());
     }
 }

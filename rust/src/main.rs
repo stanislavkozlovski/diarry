@@ -61,7 +61,20 @@ fn cors_preflight() -> PreflightCORS {
 
 
 #[get("/api/entries/<id>")]
-fn diary_details_controller<'a>(id: i32) -> Response<'static> {
+fn diary_details_controller<'a>(id: i32, owner: DiaryOwner) -> Response<'static> {
+    // TODO: 
+    /*
+    Forwarding#
+In this example above, what if id isn’t a i32? 
+In this case, the request is forwarded to the next matching route, if there is any. 
+This continues until a route doesn’t forward the request or there are no remaining routes to try. 
+When there are no remaining matching routes, a customizable 404 error is returned.
+
+rank route param
+#[get("/user/<id>", rank = 2)]
+
+
+    */
     let diary_entry: Option<DiaryEntry> = db_queries::fetch_diary_entry(&db_queries::establish_connection(), id);
 
     if diary_entry.is_none() {
