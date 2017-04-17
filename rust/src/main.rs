@@ -102,7 +102,7 @@ rank route param
 }
 
 #[get("/api/entries/all")]
-fn all_diary_entries_controller() -> CORS<JSON<Vec<DiaryEntry>>> {
+fn all_diary_entries_controller(owner: DiaryOwner) -> CORS<JSON<Vec<DiaryEntry>>> {
     /* Return all the Diary Entries, ordered by their date descending */
     let connection: PgConnection = db_queries::establish_connection();
     CORS::any(JSON(db_queries::fetch_all_diary_entries(&connection, true)))

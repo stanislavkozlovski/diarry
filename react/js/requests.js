@@ -26,6 +26,22 @@ function getDiaryEntryDetails (diaryEntryId) {
   })
 }
 
-export { getDiaryEntryDetails }
+/**
+ * Queries the server for all the Diary Entries ever created
+ * @return {Promise} - an axios GET query to /api/entries/all, which should return all the diary entries
+ */
+function getAllDiaryEntries () {
+  return axios.get(`http://localhost:8000/api/entries/all`).then((resp) => {
+    return resp.data
+  }).catch(err => {
+    if (err.response && err.response.status === 401 && err.response.data.error_message) {
+      throw new Error(`Unexpected error: ${err.response.data.error_message}`)
+    }
+    throw new Error(`Unexpected error: ${err}`)
+  })
+}
 
-/* TODO: More tests and authentication */
+
+export { getDiaryEntryDetails, getAllDiaryEntries }
+
+/* TODO: Authentication */

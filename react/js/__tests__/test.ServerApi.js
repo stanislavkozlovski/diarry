@@ -1,4 +1,4 @@
-import {getDiaryEntryDetails} from '../requests.js'
+import { getDiaryEntryDetails, getAllDiaryEntries } from '../requests.js'
 
 /**
  * This file tests the API endpoints on the server
@@ -31,7 +31,15 @@ it('Diary Details require authentication', done => {
   getDiaryEntryDetails(1).then((diaryEntry) => {
     throw new Error('Promise should have returned an error')
   }).catch(err => {
-    console.log(err)
+    expect(err.message).toBe("Unexpected error: Missing or Invalid JWT Token in the 'jwt-auth' header!")
+    done()
+  })
+})
+
+it('All Diary Details require authentication', done => {
+  getAllDiaryEntries().then((diaryEntries) => {
+    throw new Error('Promise should have returned an error')
+  }).catch(err => {
     expect(err.message).toBe("Unexpected error: Missing or Invalid JWT Token in the 'jwt-auth' header!")
     done()
   })
