@@ -38,7 +38,7 @@ use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo, 
 
 
 #[post("/api/entries/new", format = "application/json", data = "<new_entry>")]
-fn new_diary_controller(new_entry: JSON<NewDiaryEntry>) -> CORS<Result<JSON<DiaryEntryMetaInfo>, JSON<ErrorDetails>>> {
+fn new_diary_controller(new_entry: JSON<NewDiaryEntry>, owner: DiaryOwner) -> CORS<Result<JSON<DiaryEntryMetaInfo>, JSON<ErrorDetails>>> {
     if new_entry.body.len() <= 5 || new_entry.title.len() <= 10 {
         let json_err = JSON(ErrorDetails{ error_message: String::from("The length of the body and title must be greater than 5 and 10 characters!") });
         return CORS::any(Err(json_err))

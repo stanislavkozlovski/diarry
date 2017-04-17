@@ -41,7 +41,21 @@ function getAllDiaryEntries () {
   })
 }
 
+function submitNewDiary (title, body) {
+  return axios.post('http://localhost:8000/api/entries/new', {
+    title,
+    body
+  }).then(resp => {
+    return resp
+  }).catch(err => {
+    if (err.response && err.response.status === 401 && err.response.data.error_message) {
+      throw new Error(`Unexpected error: ${err.response.data.error_message}`)
+    }
+    return `Unexpected error: ${err}`
+  })
+}
 
-export { getDiaryEntryDetails, getAllDiaryEntries }
+
+export { getDiaryEntryDetails, getAllDiaryEntries, submitNewDiary }
 
 /* TODO: Authentication */

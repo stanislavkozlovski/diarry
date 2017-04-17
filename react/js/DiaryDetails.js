@@ -24,19 +24,10 @@ const DiaryDetails = React.createClass({
 
   componentDidMount () {
     /* query the backend for details for a specific DiaryEntry and show it to the user */
-    axios.get(`http://localhost:8000/api/entries/${this.props.params.id}`)
-    .then(resp => {
-      this.setState(resp.data)
+    getDiaryEntryDetails(this.props.params.id).then(data => {
+      this.setState(data)
     }).catch(err => {
-      if (err.response) {
-        if (err.response.status === 404) {
-          this.setState({error: `No entry with ID ${this.props.params.id} exists!`})
-        } else {
-          console.log(`Unexpected error: ${err}`)
-        }
-      } else {
-        console.log(`Unexpected error: ${err}`)
-      }
+      this.setState({error: err.message})
     })
   },
 
