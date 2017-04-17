@@ -56,7 +56,7 @@ fn cors_preflight() -> PreflightCORS {
     CORS::preflight("*")
         .methods(&vec![Method::Options, Method::Post])
         .credentials(true)
-        .headers(&vec!["Content-Type"])
+        .headers(&vec!["Content-Type", "jwt-auth"])
 }
 
 
@@ -143,13 +143,14 @@ fn login_auth_controller(owner: JSON<NewDiaryOwner>) -> CORS<String>{
 
     return CORS::any(gen_jwt);
 }
-
-#[route(OPTIONS, "/api/authenticate")]
-fn cors_preflight_auth() -> PreflightCORS {
+// TODO: Split preflight handlers into GET and POST
+use std::path::PathBuf;
+#[route(OPTIONS, "/<empty..>")]
+fn cors_preflight_auth(empty: PathBuf) -> PreflightCORS {
     CORS::preflight("*")
         .methods(&vec![Method::Options, Method::Post])
         .credentials(true)
-        .headers(&vec!["Content-Type"])
+        .headers(&vec!["Content-Type", "jwt-auth"])
 }
 
 

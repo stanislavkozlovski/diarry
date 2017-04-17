@@ -1,3 +1,5 @@
+const ID_TOKEN_KEY = 'jwt-auth'
+
 class Auth {
   /**
    * Authenticate a user. Save a token string in Local Storage
@@ -5,7 +7,9 @@ class Auth {
    * @param {string} token
    */
   static authenticateUser (token) {
-    localStorage.setItem('token', token)
+    if (window.localStorage) {
+      localStorage.setItem(ID_TOKEN_KEY, token)
+    }
   }
 
   /**
@@ -14,7 +18,9 @@ class Auth {
    * @returns {boolean}
    */
   static isUserAuthenticated () {
-    return localStorage.getItem('token') !== null
+    if (window.localStorage) {
+      return localStorage.getItem(ID_TOKEN_KEY) !== null
+    }
   }
 
   /**
@@ -22,7 +28,9 @@ class Auth {
    *
    */
   static deauthenticateUser () {
-    localStorage.removeItem('token')
+    if (window.localStorage) {
+      localStorage.removeItem(ID_TOKEN_KEY)
+    }
   }
 
   /**
@@ -31,7 +39,9 @@ class Auth {
    * @returns {string}
    */
   static getToken () {
-    return localStorage.getItem('token')
+    if (window.localStorage) {
+      return localStorage.getItem(ID_TOKEN_KEY)
+    }
   }
 }
 
