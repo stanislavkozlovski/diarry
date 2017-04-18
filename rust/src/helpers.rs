@@ -9,18 +9,23 @@ use jwt::{
     Registered,
     Token,
 };
+use time;
+use time::Duration;
+
 
 pub fn generate_jwt_token(email: String) -> String {
     let header: Header = Default::default();
-    // TODO: iss, exp, iat etc
+    // TODO: iss, iat etc
+    let expiryDate = time::get_time() + Duration::hours(24);
+    println!("At time {:?} generated token {:?}", time::get_time(), expiryDate);
     let claims = Registered {
         sub: Some(email),
+        exp: Some(expiryDate.sec as u64),
         ..Default::default()
     };
 
     let token = Token::new(header, claims);
     // Sign the token
-    // TODO: Secret key
     if let Err(e) = env::var("SECRET_KEY") {
         panic!("Your SECRET_KEY environment variable is not set! Please configure it in your .env file.")
     }

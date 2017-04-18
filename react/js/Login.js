@@ -25,7 +25,6 @@ const Login = React.createClass({
 
     let email = this.state.email
     let password = this.state.password
-    // TODO: POST credentials to server and await response
     // TODo: Add some sort of loading
     axios.post('http://localhost:8000/api/authenticate', { email, password }).then(resp => {
       // successful login, save the token and redirect to the homepage

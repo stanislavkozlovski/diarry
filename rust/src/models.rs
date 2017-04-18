@@ -6,8 +6,13 @@ use rocket::http::Status;
 use rocket::request::{self, Request, FromRequest};
 use super::schema::{ diary_owner, diary_entries };
 use self::chrono::{NaiveDate, NaiveTime};
+use time;
+use jwt::Token;
+use jwt::error::Error as JwtErrorEnum;
+use jwt::header::Header as JwtHeader;
+use jwt::claims::Claims as JwtClaims;
+use jwt::{Component, Error as JwtError};
 
-// pub mod db_queries;
 use db_queries::{ establish_connection, fetch_user_with_jwt };
 
  
@@ -96,9 +101,31 @@ impl<'a, 'r> FromRequest<'a, 'r> for DiaryOwner {
             return Outcome::Failure((Status::Unauthorized, ()));
         }
 
-        let given_jwt = keys[0];
+        let given_jwt: &str = keys[0];
+        
+        // check if the JWT is expired
+        if given_jwt.len() > 1 {
+            let token: Result<Token<JwtHeader, JwtClaims>, JwtErrorEnum> = Token::parse(given_jwt);
+            if token.is_err() {
+                println!("{:?}", token.err());
+                println!("Token unpacking errored!");
+                println!("{:?}", given_jwt);
+                return Outcome::Failure((Status::Unauthorized, ()));
+            }
+            let expiryEpoch: Option<u64> = token.unwrap().claims.reg.exp;
+            if expiryEpoch.is_none() {
+                println!("Epoch errored!");
+                return Outcome::Failure((Status::Unauthorized, ()));
+            }
+            let currentTime: u64 = time::get_time().sec as u64;
+            if currentTime > expiryEpoch.unwrap() {
+                // the Token has expired!
+                println!("Token has expired!");
+                
+                return Outcome::Failure((Status::Unauthorized, ()));
+            }
+        }
         // try to fetch a user with that JWT Token
-        // TODO: JWT Expiration!
         let potential_owner: Option<DiaryOwner> = fetch_user_with_jwt(&establish_connection(), String::from(given_jwt));
         if potential_owner.is_none() {
             return Outcome::Failure((Status::Unauthorized, ()));

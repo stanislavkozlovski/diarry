@@ -9,6 +9,7 @@ extern crate dotenv;
 extern crate djangohashers;
 extern crate crypto;
 extern crate jwt;
+extern crate time;
 
 pub mod models;
 pub mod schema;
