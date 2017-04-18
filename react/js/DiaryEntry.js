@@ -1,4 +1,5 @@
 import React from 'react'
+const { string } = React.PropTypes
 
 const DiaryEntry = (props) => {
   // parse the date to a Date object
@@ -30,6 +31,13 @@ const DiaryEntry = (props) => {
       <p>{props.body}</p>
     </article>
   )
+}
+
+DiaryEntry.propTypes = {
+  date: string,
+  time: string,
+  title: string,
+  body: string
 }
 
 export default DiaryEntry

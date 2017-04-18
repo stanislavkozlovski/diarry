@@ -16,6 +16,7 @@
   "dependencies": {
     "axios": "0.15.2",
     "babel-jest": "^16.0.0",
+    "dotenv": "^4.0.0",
     "history": "^4.4.0",
     "lodash": "4.16.2",
     "react": "15.3.2",
@@ -62,5 +63,8 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/btholt/complete-intro-to-react.git"
+  },
+  "jest": {
+    "setupTestFrameworkScriptFile": "./js/__tests__/setup.js"
   }
 }

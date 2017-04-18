@@ -2,6 +2,24 @@ import Auth from './auth.js'
 import axios from 'axios'
 
 /**
+ * Handles an error, returning an appropriate message for throwing as a separate Error
+  In the case of an 401 error, deauthenticates the User since his JWT Token is either invalid or non-existant
+ * @param {*} err - the error object received
+ */
+function handleResponseError (err) {
+  let errorMessage = ''
+  if (err.response && err.response.data !== undefined && err.response.data.error_message !== undefined) {
+    // JWT Token is non-existant or expired
+    Auth.deauthenticateUser()
+    errorMessage = `Unexpected error: ${err.response.data.error_message}`
+  } else {
+    errorMessage = `Unexpected error: ${err}`
+  }
+
+  return errorMessage
+}
+
+/**
  * Fills a config with headers of the required JWT authentication
  * @return {Object} - A config to be used on an axios request
  */
@@ -20,19 +38,15 @@ function getDiaryEntryDetails (diaryEntryId) {
   .then(resp => {
     return resp.data
   }).catch(err => {
+    console.log(err.message)
     if (err.response) {
       if (err.response.status === 404) {
         throw new Error(`No entry with ID ${diaryEntryId} exists!`)
       } else {
-        if (err.response.data !== undefined && err.response.data.error_message !== undefined) {
-          // JWT Token is non-existant or expired
-          Auth.deauthenticateUser()
-          throw new Error(`Unexpected error: ${err.response.data.error_message}`)
-        }
-        throw new Error(`Unexpected error: ${err}`)
+        throw new Error(handleResponseError(err))
       }
     } else {
-      throw new Error(`Unexpected error: ${err}`)
+      throw new Error(handleResponseError(err))
     }
   })
 }
@@ -45,12 +59,7 @@ function getAllDiaryEntries () {
   return axios.get(`http://localhost:8000/api/entries/all`, {}, getAxiosConfig()).then((resp) => {
     return resp.data
   }).catch(err => {
-    if (err.response && err.response.status === 401 && err.response.data.error_message) {
-      // JWT Token is non-existant or expired
-      Auth.deauthenticateUser()
-      throw new Error(`Unexpected error: ${err.response.data.error_message}`)
-    }
-    throw new Error(`Unexpected error: ${err}`)
+    throw new Error(handleResponseError(err))
   })
 }
 
@@ -63,12 +72,7 @@ function getLastFiveDiaryEntryMetaData () {
   .then(resp => {
     return resp.data
   }).catch(err => {
-    if (err.response && err.response.status === 401 && err.response.data.error_message) {
-      // JWT Token is non-existant or expired
-      Auth.deauthenticateUser()
-      throw new Error(`Unexpected error: ${err.response.data.error_message}`)
-    }
-    throw new Error(`Unexpected error: ${err}`)
+    throw new Error(handleResponseError(err))
   })
 }
 
@@ -84,16 +88,9 @@ function submitNewDiary (title, body) {
   }, getAxiosConfig()).then(resp => {
     return resp
   }).catch(err => {
-    if (err.response && err.response.status === 401 && err.response.data.error_message) {
-      // JWT Token is non-existant or expired
-      Auth.deauthenticateUser()
-      throw new Error(`Unexpected error: ${err.response.data.error_message}`)
-    }
-    return `Unexpected error: ${err}`
+    throw new Error(handleResponseError(err))
   })
 }
 
 
 export { getDiaryEntryDetails, getLastFiveDiaryEntryMetaData, getAllDiaryEntries, submitNewDiary }
-
-/* TODO: Authentication */

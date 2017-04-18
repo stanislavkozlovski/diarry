@@ -1,5 +1,4 @@
 import React from 'react'
-import axios from 'axios'
 import DiaryEntry from './DiaryEntry.js'
 import {getDiaryEntryDetails} from './requests.js'
 const { shape, string } = React.PropTypes

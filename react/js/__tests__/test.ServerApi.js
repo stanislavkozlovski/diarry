@@ -1,5 +1,5 @@
 import { getDiaryEntryDetails, getLastFiveDiaryEntryMetaData, getAllDiaryEntries, submitNewDiary } from '../requests.js'
-import axios from 'axios'
+import {removeJWTTokenHeader, setJWTTokenHeader} from '../testBase.js'
 
 /**
  * This file tests the API endpoints on the server
@@ -8,27 +8,41 @@ import axios from 'axios'
  */
 
 
-// TODO: Load username/password; authenticate via endpoint and save the JWT Token
+it('Diary Entry 1 exists', done => {
+  setJWTTokenHeader().then(() => {
+    getDiaryEntryDetails(1).then((diaryEntry) => {
+      expect(diaryEntry.id).toBe(1)
+      done()
+    }).catch(err => {
+      throw new Error(err)
+    })
+  })
+})
 
-// it('Diary Entry 1 exists', done => {
-//   getDiaryEntryDetails(1).then((diaryEntry) => {
-//     expect(diaryEntry.id).toBe(1)
-//     done()
-//   }).catch(err => {
-//     throw new Error(err)
-//   })
-// })
 
-// it('Diary Entry with invalid ID should return an error', done => {
-//   getDiaryEntryDetails(99999).then((diaryEntry) => {
-//     throw new Error('Promise should have returned an error')
-//   }).catch(err => {
-//     expect(err.message).toBe('No entry with ID 99999 exists!')
-//     done()
-//   })
-// })
+it('All Diaries returns array', done => {
+  setJWTTokenHeader().then(() => {
+    getAllDiaryEntries().then((diaryEntries) => {
+      expect(Array.isArray(diaryEntries)).toBe(true)
+      expect(diaryEntries.length > 1).toBe(true)
+      done()
+    }).catch(err => {
+      throw new Error('Promise should not have returned an error' + err)
+    })
+  })
+})
+
+it('Diary Entry with invalid ID should return an error', done => {
+  getDiaryEntryDetails(99999).then((diaryEntry) => {
+    throw new Error('Promise should have returned an error')
+  }).catch(err => {
+    expect(err.message).toBe('No entry with ID 99999 exists!')
+    done()
+  })
+})
 
 it('Diary Details require authentication', done => {
+  removeJWTTokenHeader()
   getDiaryEntryDetails(1).then((diaryEntry) => {
     throw new Error('Promise should have returned an error')
   }).catch(err => {
@@ -38,6 +52,7 @@ it('Diary Details require authentication', done => {
 })
 
 it('All Diary Details require authentication', done => {
+  removeJWTTokenHeader()
   getAllDiaryEntries().then((diaryEntries) => {
     throw new Error('Promise should have returned an error')
   }).catch(err => {
@@ -46,16 +61,17 @@ it('All Diary Details require authentication', done => {
   })
 })
 
-// it('Submit New Diary route requires authentication', done => {
-//   submitNewDiary('Test Title ', 'Test Body Test Body').then(() => {
-//     throw new Error('Promise should have returned an error')
-//   }).catch(err => {
-//     expect(err.message).toBe("Unexpected error: Missing or Invalid JWT Token in the 'jwt-auth' header!")
-//     done()
-//   })
-// })
+it('Submit New Diary route requires authentication', done => {
+  submitNewDiary('Test Title ', 'Test Body Test Body').then(() => {
+    throw new Error('Promise should have returned an error')
+  }).catch(err => {
+    expect(err.message).toBe("Unexpected error: Missing or Invalid JWT Token in the 'jwt-auth' header!")
+    done()
+  })
+})
 
 it('Last Five Diaries requires authentication', done => {
+  removeJWTTokenHeader()
   getLastFiveDiaryEntryMetaData().then(() => {
     throw new Error('Promise should have returned an error')
   }).catch(err => {
@@ -63,3 +79,4 @@ it('Last Five Diaries requires authentication', done => {
     done()
   })
 })
+
