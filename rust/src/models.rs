@@ -98,6 +98,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for DiaryOwner {
 
         let given_jwt = keys[0];
         // try to fetch a user with that JWT Token
+        // TODO: JWT Expiration!
         let potential_owner: Option<DiaryOwner> = fetch_user_with_jwt(&establish_connection(), String::from(given_jwt));
         if potential_owner.is_none() {
             return Outcome::Failure((Status::Unauthorized, ()));
