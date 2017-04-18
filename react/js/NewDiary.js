@@ -1,5 +1,5 @@
 import React from 'react'
-import axios from 'axios'
+import {submitNewDiary} from './requests.js'
 import SweetAlert from 'sweetalert-react'
 
 const NewDiary = React.createClass({
@@ -46,20 +46,15 @@ const NewDiary = React.createClass({
     event.preventDefault()
     let diaryTitle = this.state.title
     let diaryBody = this.state.body
-    
+
     if (diaryTitle.length <= 5) {
       this.state.showAlert = true
       this.setState({ showAlert: true, alertTitle: 'Title Too Short!', alertDesc: 'The title you entered is shorter than 5 characters!' })
     } else if (diaryBody.length <= 10) {
       this.setState({ showAlert: true, alertTitle: 'Content Too Short!', alertDesc: "Your entry's content is shorter than 10 characters!" })
     } else {
-      axios.post('http://localhost:8000/api/entries/new', {
-        title: this.state.title,
-        body: this.state.body
-      }).then(resp => {
-        console.log(resp)
-      }).catch(err => {
-        console.log(`Error: ${err}`)
+      submitNewDiary(diaryTitle, diaryBody).then(msg => {
+        console.log(msg)
       })
     }
   },

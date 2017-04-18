@@ -1,6 +1,7 @@
 import React from 'react'
 import { render } from 'react-dom'
 import { HashRouter, Match } from 'react-router'
+import axios from 'axios'
 
 import DiaryDetails from './DiaryDetails.js'
 import LandingPage from './Landing.js'
@@ -15,6 +16,11 @@ import '../public/css/style-desktop.css'
 import '../public/css/style-1200px.css'
 import '../public/css/style.css'
 import Login from './Login.js'
+
+// set the JWT token header
+if (window.localStorage && localStorage['jwt-auth']) {
+  axios.defaults.headers.common['jwt-auth'] = localStorage['jwt-auth']
+}
 
 const App = React.createClass({
   render: function () {

@@ -1,14 +1,14 @@
 import React from 'react'
-import axios from 'axios'
 
 import DiaryEntry from './DiaryEntry.js'
+import {getAllDiaryEntries} from './requests.js'
 
 const LandingPage = React.createClass({
   componentDidMount () {
-    axios.get(`http://localhost:8000/api/entries/all`).then((resp) => {
-      this.setState({diaryEntries: resp.data})
+    getAllDiaryEntries().then(diaryEntries => {
+      this.setState({diaryEntries: diaryEntries})
     }).catch(err => {
-      console.log(`Unexpected error: ${err}`)
+      console.log(err)
     })
   },
 

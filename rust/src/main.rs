@@ -9,6 +9,7 @@ extern crate dotenv;
 extern crate djangohashers;
 extern crate crypto;
 extern crate jwt;
+extern crate time;
 
 pub mod models;
 pub mod schema;
@@ -38,7 +39,7 @@ use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo, 
 
 
 #[post("/api/entries/new", format = "application/json", data = "<new_entry>")]
-fn new_diary_controller(new_entry: JSON<NewDiaryEntry>) -> CORS<Result<JSON<DiaryEntryMetaInfo>, JSON<ErrorDetails>>> {
+fn new_diary_controller(new_entry: JSON<NewDiaryEntry>, owner: DiaryOwner) -> CORS<Result<JSON<DiaryEntryMetaInfo>, JSON<ErrorDetails>>> {
     if new_entry.body.len() <= 5 || new_entry.title.len() <= 10 {
         let json_err = JSON(ErrorDetails{ error_message: String::from("The length of the body and title must be greater than 5 and 10 characters!") });
         return CORS::any(Err(json_err))
@@ -56,12 +57,25 @@ fn cors_preflight() -> PreflightCORS {
     CORS::preflight("*")
         .methods(&vec![Method::Options, Method::Post])
         .credentials(true)
-        .headers(&vec!["Content-Type"])
+        .headers(&vec!["Content-Type", "jwt-auth"])
 }
 
 
 #[get("/api/entries/<id>")]
-fn diary_details_controller<'a>(id: i32) -> Response<'static> {
+fn diary_details_controller<'a>(id: i32, owner: DiaryOwner) -> Response<'static> {
+    // TODO: 
+    /*
+    Forwarding#
+In this example above, what if id isn’t a i32? 
+In this case, the request is forwarded to the next matching route, if there is any. 
+This continues until a route doesn’t forward the request or there are no remaining routes to try. 
+When there are no remaining matching routes, a customizable 404 error is returned.
+
+rank route param
+#[get("/user/<id>", rank = 2)]
+
+
+    */
     let diary_entry: Option<DiaryEntry> = db_queries::fetch_diary_entry(&db_queries::establish_connection(), id);
 
     if diary_entry.is_none() {
@@ -89,14 +103,14 @@ fn diary_details_controller<'a>(id: i32) -> Response<'static> {
 }
 
 #[get("/api/entries/all")]
-fn all_diary_entries_controller() -> CORS<JSON<Vec<DiaryEntry>>> {
+fn all_diary_entries_controller(owner: DiaryOwner) -> CORS<JSON<Vec<DiaryEntry>>> {
     /* Return all the Diary Entries, ordered by their date descending */
     let connection: PgConnection = db_queries::establish_connection();
     CORS::any(JSON(db_queries::fetch_all_diary_entries(&connection, true)))
 }
 
 #[get("/api/entries/last_five")]
-fn last_five_diary_entries_controller() -> CORS<JSON<Vec<DiaryEntryMetaInfo>>> {
+fn last_five_diary_entries_controller(owner: DiaryOwner) -> CORS<JSON<Vec<DiaryEntryMetaInfo>>> {
     /* Returns meta information about the last five diary entries */
     let connection: PgConnection = db_queries::establish_connection();
     let last_five_entries: Vec<DiaryEntry> = db_queries::fetch_last_five_diary_entries(&connection);
@@ -130,13 +144,21 @@ fn login_auth_controller(owner: JSON<NewDiaryOwner>) -> CORS<String>{
 
     return CORS::any(gen_jwt);
 }
-
-#[route(OPTIONS, "/api/authenticate")]
-fn cors_preflight_auth() -> PreflightCORS {
+// TODO: Split preflight handlers into GET and POST
+use std::path::PathBuf;
+#[route(OPTIONS, "/<empty..>")]
+fn cors_preflight_auth(empty: PathBuf) -> PreflightCORS {
     CORS::preflight("*")
         .methods(&vec![Method::Options, Method::Post])
         .credentials(true)
-        .headers(&vec!["Content-Type"])
+        .headers(&vec!["Content-Type", "jwt-auth"])
+}
+
+
+#[error(401)]
+fn fallback_unauthenticated() -> CORS<JSON<ErrorDetails>> {
+    let json_err = JSON(ErrorDetails{ error_message: String::from("Missing or Invalid JWT Token in the 'jwt-auth' header!") });
+    return CORS::any(json_err).status(Status::Unauthorized);
 }
 
 fn main() {
@@ -144,6 +166,7 @@ fn main() {
     db_queries::seed_diary_owner();
     rocket::ignite()
         .mount("/", routes![new_diary_controller, diary_details_controller, all_diary_entries_controller, last_five_diary_entries_controller, cors_preflight, cors_preflight_auth, login_auth_controller])
+        .catch(errors![fallback_unauthenticated])
         .launch();
 }
 
