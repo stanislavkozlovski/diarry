@@ -5,4 +5,5 @@ target/
 .idea/
 __pycache__/
 venv/
+diary.txt
 **/*.rs.bk

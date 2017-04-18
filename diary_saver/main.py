@@ -19,8 +19,8 @@ def format_diary_entry(entry: models.DiaryEntry) -> str:
     entry_id = entry.id
     title = entry.title
     body = entry.body
-    date = model.creation_date.strftime("%d %B %Y")
-    time = model.creation_time.strftime("%H:%M")
+    date = entry.creation_date.strftime("%d %B %Y")
+    time = entry.creation_time.strftime("%H:%M")
 
     formatted_entry = f"""\t\t\t\t\t\t\t{title}
 #{entry_id} - {date} {time}
@@ -29,3 +29,13 @@ def format_diary_entry(entry: models.DiaryEntry) -> str:
     """
     return formatted_entry
 
+
+def write_entries_to_file():
+    """
+    Writes all the diary entries to the file
+    :return:
+    """
+    with open('diary.txt', 'w') as diary_file:
+        for diary_entry in fetch_all_entries_sorted_by_date():
+            diary_file.write(format_diary_entry(diary_entry))
+            diary_file.write('\n' + '-' * 100 + '\n')

@@ -9,8 +9,8 @@ from sqlalchemy.orm import sessionmaker
 
 os.chdir('../rust')  # navigate to rust's folder path
 rust_folder_path = os.getcwd()
+os.chdir('../')  # navigate back to the root folder of the app, so that diary.txt is saved there
 dotenv_path = join(rust_folder_path, '.env')
-
 load_dotenv(dotenv_path)
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
