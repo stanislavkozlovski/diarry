@@ -9,4 +9,7 @@ It
 As such, the .env file in the /rust/ subdirectory needs to additionally have a
 * SENDER_EMAIL_ADDRESS
 * SENDER_EMAIL_PASSWORD
-* SENDER_EMAIL_SMTP_PORT    
+* SENDER_EMAIL_SMTP_PORT - the port of the SMTP server (e.g for gmail - 465)    
+* SENDER_EMAIL_SMTP_ADDRESS - the address of the SMTP server (e.g smtp.gmail.com)
+
+Currently works for only SSL-enabled SMTP servers

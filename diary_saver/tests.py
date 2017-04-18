@@ -1,8 +1,8 @@
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from datetime import date, time
 
-from main import fetch_all_entries_sorted_by_date, format_diary_entry
+from main import fetch_all_entries_sorted_by_date, format_diary_entry, send_email
 from models import DiaryEntry
 
 
@@ -28,6 +28,24 @@ class Tests(unittest.TestCase):
 Training Insane"""
 
         self.assertIn(expected_output, format_diary_entry(diary_entry))
+
+    @patch('main.smtplib.SMTP_SSL')
+    def test_send_email(self, SMTP_SSL_mock):
+        from settings import SENDER_SMTP_ADDRESS, SENDER_EMAIL_SMTP_PORT, SENDER_EMAIL, SENDER_EMAIL_PASSWORD
+        login_mock = MagicMock()
+        send_email_mock = MagicMock()
+        smtp_connection_mock = MagicMock(login=login_mock, sendmail=send_email_mock)
+        SMTP_SSL_mock.return_value = smtp_connection_mock
+
+        send_email()
+
+        # Assert it tries to establish a connection
+        SMTP_SSL_mock.assert_called_once_with(SENDER_SMTP_ADDRESS, SENDER_EMAIL_SMTP_PORT)
+        # assert it tries to log in
+        login_mock.assert_called_once_with(SENDER_EMAIL, SENDER_EMAIL_PASSWORD)
+        # assert it tries to send the email
+        send_email_mock.assert_called_once()
+
 
 if __name__ == '__main__':
     unittest.main()

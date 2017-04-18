@@ -2,6 +2,8 @@
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
+import socket
+socket.setdefaulttimeout(120)  # set a timeout for the email connection
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -17,7 +19,13 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 RECEIVER_EMAIL = os.environ.get("EMAIL")
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL_ADDRESS")
 SENDER_EMAIL_PASSWORD = os.environ.get("SENDER_EMAIL_PASSWORD")
-SENDER_EMAIL_HTTP_PORT = os.environ.get("SENDER_EMAIL_HTTP_PORT")
+SENDER_EMAIL_SMTP_PORT = os.environ.get("SENDER_EMAIL_SMTP_PORT")
+SENDER_SMTP_ADDRESS = os.environ.get("SENDER_SMTP_ADDRESS")
+
+if not all([DATABASE_URL, RECEIVER_EMAIL, SENDER_EMAIL, SENDER_EMAIL_SMTP_PORT,
+            SENDER_EMAIL_PASSWORD, SENDER_SMTP_ADDRESS]):
+    raise Exception('Environment variables are not properly set!')
+
 
 # Setup SQLAlchemy
 engine = create_engine(DATABASE_URL)
