@@ -1,5 +1,5 @@
 #![feature(plugin)]
-#![feature(custom_attribute)]
+// #![feature(custom_attribute)]
 #![plugin(rocket_codegen)]
 extern crate rocket;
 #[macro_use] extern crate rocket_contrib;
@@ -213,8 +213,9 @@ mod tests {
     use diary_details_controller;
     #[test]
     fn test_details_should_return_correct_entry_and_200() {
+        let _author = DiaryOwner {id: 1, email: String::from("manage@abv.bg"), password: String::from("123"), jwt: Some(String::from("W"))};
         dotenv().ok();
-        let mut response: Response = diary_details_controller(1);
+        let mut response: Response = diary_details_controller(1, _author);
 
         let expected_entry = fetch_diary_entry(&establish_connection(), 1).unwrap();
         let received_entry: DiaryEntry = serde_json::from_str(
@@ -228,8 +229,9 @@ mod tests {
     use models::ErrorDetails;
     #[test]
     fn test_details_should_return_error_message_and_404() {
+        let _author = DiaryOwner {id: 1, email: String::from("manage@abv.bg"), password: String::from("123"), jwt: Some(String::from("W"))};
         dotenv().ok();
-        let mut response: Response = diary_details_controller(i32::max_value());
+        let mut response: Response = diary_details_controller(i32::max_value(), _author);
         let error_details: ErrorDetails = serde_json::from_str(
                 &response.body().unwrap().into_string().unwrap()
             ).unwrap();
@@ -285,10 +287,12 @@ mod tests {
     #[test]
     fn test_all_diary_entries_controller_should_return_all_entries_in_json_ordered() {
         /* the controller should return all the entries ordered by date and time desc */
+        let _author = DiaryOwner {id: 1, email: String::from("manage@abv.bg"), password: String::from("123"), jwt: Some(String::from("W"))};
+        
         dotenv().ok();
         let connection: PgConnection = establish_connection();
         let expected_entries: JSON<Vec<DiaryEntry>> = JSON(diary_entries.order((creation_date.desc(), creation_time.desc())).load::<DiaryEntry>(&connection).unwrap());
-        let response = all_diary_entries_controller();
+        let response = all_diary_entries_controller(_author);
         let received_entries = response.get_responder().deref().deref();
         assert_eq!(received_entries, expected_entries.into_inner().deref());
     }
@@ -306,10 +310,10 @@ mod tests {
             let ref newer_entry: DiaryEntry = received_entries[i];
             for j in i+1..received_entries.len() {
                 let ref older_entry: DiaryEntry = received_entries[j];
-                if newer_entry.date == older_entry.date {
-                    assert!(newer_entry.time >= older_entry.time);
+                if newer_entry.creation_date == older_entry.creation_date {
+                    assert!(newer_entry.creation_time >= older_entry.creation_time);
                 } else {
-                    assert!(newer_entry.date > older_entry.date);
+                    assert!(newer_entry.creation_date > older_entry.creation_date);
                 }
             }
         }
@@ -330,10 +334,11 @@ mod tests {
     #[test]
     fn test_last_five_diary_entries_controller_returns_correct_entries() {
         use schema::diary_entries::dsl::{creation_date, creation_time};
+        let _author = DiaryOwner {id: 1, email: String::from("manage@abv.bg"), password: String::from("123"), jwt: Some(String::from("W"))};
         dotenv().ok();
         let connection: PgConnection = establish_connection();
         let expected_entries: Vec<DiaryEntry> = diary_entries.order((creation_date.desc(), creation_time.desc())).limit(5).load::<DiaryEntry>(&connection).unwrap();
-        let response = last_five_diary_entries_controller();
+        let response = last_five_diary_entries_controller(_author);
         let received_entries: &Vec<DiaryEntryMetaInfo> = response.get_responder().deref();
 
         assert_eq!(expected_entries.len(), received_entries.len());

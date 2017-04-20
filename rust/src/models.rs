@@ -17,18 +17,17 @@ use db_queries::{ establish_connection, fetch_user_with_jwt };
 use schema::diary_comments;
 
 #[derive(Debug)]
-#[derive(Queryable)]
 #[derive(Deserialize)]
 #[derive(Serialize)]
-#[derive(Identifiable)]
 #[table_name="diary_entries"]
-#[has_many(diary_comments)]
+#[has_many(diary_comments, foreign_key="entry_id")]
+#[derive(Identifiable, Queryable, Associations)]
 pub struct DiaryEntry {
     pub id: i32,
     pub title: String,
     pub body: String,
-    pub date: NaiveDate,
-    pub time: NaiveTime
+    pub creation_date: NaiveDate,
+    pub creation_time: NaiveTime
 }
 
 impl PartialEq for DiaryEntry {
@@ -49,15 +48,15 @@ impl DiaryEntry {
 
 
 #[derive(Identifiable, Queryable, Associations)]
-#[belongs_to(DiaryEntry)]
 #[derive(Serialize)]
 #[table_name="diary_comments"]
+#[belongs_to(DiaryEntry, foreign_key="entry_id")]
 pub struct DiaryComment {
     id: i32,
     pub entry_id: i32,
     body: String,
-    pub date: NaiveDate,
-    pub time: NaiveTime
+    pub creation_date: NaiveDate,
+    pub creation_time: NaiveTime
 }
 
 #[derive(Insertable)]
@@ -103,8 +102,8 @@ pub struct NewDiaryOwner {
 #[derive(Debug)]
 #[derive(Queryable)]
 pub struct DiaryOwner {
-    id: i32,
-    email: String,
+    pub id: i32,
+    pub email: String,
     pub password: String,
     pub jwt: Option<String>
 }
