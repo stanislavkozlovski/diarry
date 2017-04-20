@@ -50,6 +50,7 @@ impl DiaryEntry {
 
 #[derive(Identifiable, Queryable, Associations)]
 #[belongs_to(DiaryEntry)]
+#[derive(Serialize)]
 #[table_name="diary_comments"]
 pub struct DiaryComment {
     id: i32,

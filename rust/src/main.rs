@@ -32,10 +32,10 @@ use rocket::http::hyper::header::{Headers, AccessControlAllowOrigin, AccessContr
 use rocket::http::{Status, ContentType};
 use rocket::http::Method;
 use rocket::Response;
-
+use rocket::data::Data;
 use cors::{CORS, PreflightCORS};
-use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo, DiaryOwner, NewDiaryOwner};
-
+use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo, DiaryOwner, NewDiaryOwner, DiaryComment};
+use std::io::Read;
 
 
 
@@ -53,6 +53,31 @@ fn new_diary_controller(new_entry: JSON<NewDiaryEntry>, owner: DiaryOwner) -> CO
         .status(Status::Created)
 }
 
+#[post("/api/entries/<entry_id>/comments/new", format = "application/json", data = "<body>")]
+fn new_comment_controller(entry_id: i32, body: JSON<String>) -> CORS<Result<JSON<DiaryComment>, JSON<ErrorDetails>>> {
+    // TODO: Add Author requirement (owner: DiaryOwner)
+    let mut comment_body: String = String::from(body.into_inner());
+    // body.open().read_to_string(&mut comment_body);
+
+    if comment_body.len() <= 3 || comment_body.len() > 1000 {
+        let json_err = JSON(ErrorDetails{ error_message: String::from("The length of the comment body must be greater than 3 characters and less than 1000!") });
+        return CORS::any(Err(json_err))
+            .status(Status::BadRequest);
+    }
+    // get the diary entry
+    let conn: PgConnection = db_queries::establish_connection();
+    let entry = db_queries::fetch_diary_entry(&conn, entry_id);
+    if entry.is_none() {
+        let json_err = JSON(ErrorDetails{ error_message: String::from(format!("DiaryEntry with ID {} does not exist!!", entry_id)) });
+        return CORS::any(Err(json_err))
+            .status(Status::BadRequest);
+    }
+
+    let new_comment: DiaryComment = db_queries::create_diary_comment(&conn, &comment_body.as_str(), entry_id);
+
+    CORS::any(Ok(JSON(new_comment)))
+        .status(Status::Created)
+}
 #[route(OPTIONS, "/api/entries/new")]
 fn cors_preflight() -> PreflightCORS {
     CORS::preflight("*")
@@ -166,7 +191,7 @@ fn main() {
     dotenv().ok();
     db_queries::seed_diary_owner();
     rocket::ignite()
-        .mount("/", routes![new_diary_controller, diary_details_controller, all_diary_entries_controller, last_five_diary_entries_controller, cors_preflight, cors_preflight_auth, login_auth_controller])
+        .mount("/", routes![new_diary_controller, diary_details_controller, all_diary_entries_controller, last_five_diary_entries_controller, cors_preflight, cors_preflight_auth, login_auth_controller, new_comment_controller])
         .catch(errors![fallback_unauthenticated])
         .launch();
 }
