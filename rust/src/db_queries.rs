@@ -1,6 +1,7 @@
 // pub mod schema;
 use diesel;
 use schema;
+
 use models::{DiaryEntry, NewDiaryEntry, NewDiaryOwner, DiaryOwner, DiaryComment, NewDiaryComment};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
@@ -69,6 +70,14 @@ pub fn create_diary_comment<'a>(conn: &PgConnection, body: &'a str, entry_id: i3
     diesel::insert(&new_entry).into(diary_comments::table)
         .get_result(conn)
         .expect("Error saving new comment")
+}
+
+pub fn fetch_all_comments_belonging_to_diary_entry(conn: &PgConnection, diary_entry: &DiaryEntry) -> Vec<DiaryComment> {
+    let comments: Result<Vec<DiaryComment>, diesel::result::Error> = DiaryComment::belonging_to(diary_entry).load(conn);
+    if comments.is_err() {
+        return vec![];
+    }
+    return comments.unwrap();
 }
 
 pub fn fetch_user_with_jwt(conn: &PgConnection, given_jwt: String) -> Option<DiaryOwner> {

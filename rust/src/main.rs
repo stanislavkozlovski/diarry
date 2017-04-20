@@ -34,10 +34,22 @@ use rocket::http::Method;
 use rocket::Response;
 use rocket::data::Data;
 use cors::{CORS, PreflightCORS};
-use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo, DiaryOwner, NewDiaryOwner, DiaryComment};
+use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo, DiaryOwner, NewDiaryOwner, DiaryComment, WholeDiaryEntry};
 use std::io::Read;
 
 
+fn create_whole_diary_entry(conn: &PgConnection, diary_entry: &DiaryEntry) -> WholeDiaryEntry {
+    /* Creates a WholeDiaryEntry from a DiaryEntry struct*/
+    let whole_diary = WholeDiaryEntry {
+        id: diary_entry.id,
+        title: diary_entry.title.clone(),
+        body: diary_entry.body.clone(),
+        creation_date: diary_entry.creation_date.clone(),
+        creation_time: diary_entry.creation_time.clone(),
+        comments:  db_queries::fetch_all_comments_belonging_to_diary_entry(conn, diary_entry)
+    };
+    return whole_diary;
+}
 
 #[post("/api/entries/new", format = "application/json", data = "<new_entry>")]
 fn new_diary_controller(new_entry: JSON<NewDiaryEntry>, owner: DiaryOwner) -> CORS<Result<JSON<DiaryEntryMetaInfo>, JSON<ErrorDetails>>> {
@@ -102,7 +114,8 @@ rank route param
 
 
     */
-    let diary_entry: Option<DiaryEntry> = db_queries::fetch_diary_entry(&db_queries::establish_connection(), id);
+    let conn: PgConnection = db_queries::establish_connection();
+    let diary_entry: Option<DiaryEntry> = db_queries::fetch_diary_entry(&conn, id);
 
     if diary_entry.is_none() {
         let error_message = ErrorDetails{ error_message: String::from(format!("Could not find a Diary Entry with ID {}", id)) };
@@ -116,12 +129,13 @@ rank route param
                 .finalize();
     }
 
+    let whole_diary_entry: WholeDiaryEntry = create_whole_diary_entry(&conn, &diary_entry.unwrap());
     let response: Response = Response::build()
      .status(Status::Ok)
      .header(ContentType::JSON)
      .header(AccessControlAllowOrigin::Any)
      .sized_body(Cursor::new(
-         json!(diary_entry.unwrap()).to_string()
+         json!(whole_diary_entry).to_string()
          ))
      .finalize();
 
@@ -218,11 +232,11 @@ mod tests {
         let mut response: Response = diary_details_controller(1, _author);
 
         let expected_entry = fetch_diary_entry(&establish_connection(), 1).unwrap();
-        let received_entry: DiaryEntry = serde_json::from_str(
+        let received_entry: WholeDiaryEntry = serde_json::from_str(
             &response.body().unwrap().into_string().unwrap()
             ).unwrap();
 
-        assert_eq!(received_entry, expected_entry);
+        assert_eq!(received_entry.id, expected_entry.id);
         assert_eq!(response.status().code, 200);
     }
     use rocket::Response;
@@ -377,6 +391,29 @@ mod tests {
         let received_owner: Option<DiaryOwner> = fetch_user_with_jwt(&connection, real_owner.jwt.clone().unwrap());
         assert!(received_owner.is_some());
         assert_eq!(real_owner, received_owner.unwrap());
+    }
+    use models::DiaryComment;
+    use models::WholeDiaryEntry;
+    use create_whole_diary_entry;
+    #[test]
+    fn test_create_whole_diary_entry_creates_entry_fills_comments() {
+        dotenv().ok();
+        let connection: PgConnection = establish_connection();
+        let sample_entry: DiaryEntry = diary_entries.find(1).first(&connection).unwrap();
+        let expected_commments: Vec<DiaryComment> = DiaryComment::belonging_to(&sample_entry).load(&connection).unwrap();
+
+        let whole_entry: WholeDiaryEntry = create_whole_diary_entry(&connection, &sample_entry);
+
+        assert_eq!(whole_entry.id, sample_entry.id);
+        assert_eq!(whole_entry.title, sample_entry.title);
+        assert_eq!(whole_entry.body, sample_entry.body);
+        assert_eq!(whole_entry.creation_date, sample_entry.creation_date);
+        assert_eq!(whole_entry.creation_time, sample_entry.creation_time);
+        // assert that the comments are equal
+        assert_eq!(whole_entry.comments.len(), expected_commments.len());
+        for comment_idx in 0..expected_commments.len() {
+            assert_eq!(whole_entry.comments[comment_idx], expected_commments[comment_idx]);
+        }
     }
 
     // use seed_diary_owner;

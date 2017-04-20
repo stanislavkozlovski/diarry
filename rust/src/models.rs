@@ -46,9 +46,24 @@ impl DiaryEntry {
     }
 }
 
+#[derive(Debug)]
+#[derive(Serialize)]
+#[derive(Deserialize)]
+pub struct WholeDiaryEntry {
+    /* The full DiaryEntry struct, which is meant to be deserialized and sent down the network.
+    Holds all the comments for the specific diary entry*/
+    pub id: i32,
+    pub title: String,
+    pub body: String,
+    pub creation_date: NaiveDate,
+    pub creation_time: NaiveTime,
+    pub comments: Vec<DiaryComment>
+}
 
+#[derive(Debug)]
 #[derive(Identifiable, Queryable, Associations)]
 #[derive(Serialize)]
+#[derive(Deserialize)]
 #[table_name="diary_comments"]
 #[belongs_to(DiaryEntry, foreign_key="entry_id")]
 pub struct DiaryComment {
@@ -57,6 +72,12 @@ pub struct DiaryComment {
     body: String,
     pub creation_date: NaiveDate,
     pub creation_time: NaiveTime
+}
+
+impl PartialEq for DiaryComment {
+    fn eq(&self, other: &DiaryComment) -> bool {
+        return self.id == other.id;
+    }
 }
 
 #[derive(Insertable)]
