@@ -3,7 +3,7 @@ const { string } = React.PropTypes
 
 const DiaryEntry = (props) => {
   // parse the date to a Date object
-  const date = new Date(props.date + ' ' + props.time)
+  const date = new Date(props.creation_date + ' ' + props.creation_time)
   const shortMonth = date.toLocaleString('en-us', { month: 'short' })
   const year = date.getFullYear()
   const timeStr = `${date.getHours()}:${date.getMinutes()}`
@@ -34,8 +34,8 @@ const DiaryEntry = (props) => {
 }
 
 DiaryEntry.propTypes = {
-  date: string,
-  time: string,
+  creation_date: string,
+  creation_time: string,
   title: string,
   body: string
 }
