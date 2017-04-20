@@ -12,14 +12,17 @@ use jwt::error::Error as JwtErrorEnum;
 use jwt::header::Header as JwtHeader;
 use jwt::claims::Claims as JwtClaims;
 use jwt::{Component, Error as JwtError};
-
+use diesel::associations::Identifiable;
 use db_queries::{ establish_connection, fetch_user_with_jwt };
+use schema::diary_comments;
 
- 
 #[derive(Debug)]
 #[derive(Queryable)]
 #[derive(Deserialize)]
 #[derive(Serialize)]
+#[derive(Identifiable)]
+#[table_name="diary_entries"]
+#[has_many(diary_comments)]
 pub struct DiaryEntry {
     pub id: i32,
     pub title: String,
@@ -43,6 +46,26 @@ impl DiaryEntry {
         return format!("/entry/{}", &self.id)
     }
 }
+
+
+#[derive(Identifiable, Queryable, Associations)]
+#[belongs_to(DiaryEntry)]
+#[table_name="diary_comments"]
+pub struct DiaryComment {
+    id: i32,
+    pub entry_id: i32,
+    body: String,
+    pub date: NaiveDate,
+    pub time: NaiveTime
+}
+
+#[derive(Insertable)]
+#[table_name="diary_comments"]
+pub struct NewDiaryComment {
+    pub entry_id: i32,
+    pub body: String    
+}
+
 #[derive(Deserialize)]
 #[derive(Insertable)]
 #[table_name="diary_entries"]

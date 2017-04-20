@@ -1,13 +1,14 @@
 // pub mod schema;
 use diesel;
 use schema;
-use models::{DiaryEntry, NewDiaryEntry, NewDiaryOwner, DiaryOwner};
+use models::{DiaryEntry, NewDiaryEntry, NewDiaryOwner, DiaryOwner, DiaryComment, NewDiaryComment};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use std::env;   
 use self::schema::diary_entries::dsl::{creation_date, creation_time};
 use self::schema::diary_entries::dsl::diary_entries;
 use schema::diary_owner::dsl::{diary_owner, jwt_token};
+use schema::diary_comments::dsl::{diary_comments};
 
 use djangohashers::{check_password, make_password_with_algorithm, Algorithm};
 
@@ -54,6 +55,20 @@ pub fn create_diary_entry<'a>(conn: &PgConnection, title: &'a str, body: &'a str
     diesel::insert(&new_entry).into(diary_entries::table)
         .get_result(conn)
         .expect("Error saving new post")
+}
+
+pub fn create_diary_comment<'a>(conn: &PgConnection, body: &'a str, entry_id: i32) -> DiaryComment {
+    /* Creates a new DiaryComment in the database */
+    use schema::diary_comments;
+
+    let new_entry = NewDiaryComment {
+        entry_id: entry_id,
+        body: String::from(body),
+    };
+
+    diesel::insert(&new_entry).into(diary_comments::table)
+        .get_result(conn)
+        .expect("Error saving new comment")
 }
 
 pub fn fetch_user_with_jwt(conn: &PgConnection, given_jwt: String) -> Option<DiaryOwner> {
