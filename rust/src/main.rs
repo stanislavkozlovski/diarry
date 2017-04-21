@@ -34,7 +34,7 @@ use rocket::http::Method;
 use rocket::Response;
 use rocket::data::Data;
 use cors::{CORS, PreflightCORS};
-use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo, DiaryOwner, NewDiaryOwner, DiaryComment, WholeDiaryEntry};
+use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo, DiaryOwner, NewDiaryOwner, DiaryComment, WholeDiaryEntry, DeserializableDiaryComment};
 use std::io::Read;
 
 
@@ -65,11 +65,9 @@ fn new_diary_controller(new_entry: JSON<NewDiaryEntry>, owner: DiaryOwner) -> CO
         .status(Status::Created)
 }
 
-#[post("/api/entries/<entry_id>/comments/new", format = "application/json", data = "<body>")]
-fn new_comment_controller(entry_id: i32, body: JSON<String>) -> CORS<Result<JSON<DiaryComment>, JSON<ErrorDetails>>> {
-    // TODO: Add Author requirement (owner: DiaryOwner)
-    let mut comment_body: String = String::from(body.into_inner());
-    // body.open().read_to_string(&mut comment_body);
+#[post("/api/entries/<entry_id>/comments/new", format = "application/json", data = "<deser_comment>")]
+fn new_comment_controller(entry_id: i32, deser_comment: JSON<DeserializableDiaryComment>, owner: DiaryOwner) -> CORS<Result<JSON<DiaryComment>, JSON<ErrorDetails>>> {
+    let mut comment_body: String = String::from(deser_comment.into_inner().body);
 
     if comment_body.len() <= 3 || comment_body.len() > 1000 {
         let json_err = JSON(ErrorDetails{ error_message: String::from("The length of the comment body must be greater than 3 characters and less than 1000!") });

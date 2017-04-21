@@ -88,6 +88,12 @@ pub struct NewDiaryComment {
 }
 
 #[derive(Deserialize)]
+pub struct DeserializableDiaryComment {
+    /* Used simply to enable us to parse the POST data from the new comment endpoint*/
+    pub body: String
+}
+
+#[derive(Deserialize)]
 #[derive(Insertable)]
 #[table_name="diary_entries"]
 pub struct NewDiaryEntry {
