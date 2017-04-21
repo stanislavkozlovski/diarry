@@ -45,7 +45,7 @@ const DiaryEntry = React.createClass({
       return (
         <article className='is-post is-post-excerpt'>
           <header>
-            <h2><a href='#'>{this.props.title}</a></h2>
+            <h2><a href={`/#/entry/${this.props.id}`}>{this.props.title}</a></h2>
           </header>
           <div className='info'>
             <span className='date'>

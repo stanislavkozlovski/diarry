@@ -15,7 +15,7 @@ const LandingPage = React.createClass({
   render () {
     if (this.state && this.state.diaryEntries) {
       return (
-        <div>
+        <div className='landing-entries'>
           {
             this.state.diaryEntries.map(entry => {
               return <DiaryEntry {...entry} key={entry.id} isMetaInfo />
