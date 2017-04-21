@@ -91,6 +91,18 @@ function submitNewDiary (title, body) {
     throw new Error(handleResponseError(err))
   })
 }
+/**
+ * Submits a POST request to the server for creating a new Comment that is attached to a specific DiaryEntry
+ * @param {Number} entryId - the ID of the entry that this comment is tied to
+ * @param {String} body - the content of the comment
+ */
+function submitNewComment (entryId, body) {
+  return axios.post(`http://localhost:8000/api/entries/${entryId}/comments/new`, {body}).then(resp => {
+    return resp
+  }).catch(err => {
+    throw new Error(handleResponseError(err))
+  })
+}
 
 
-export { getDiaryEntryDetails, getLastFiveDiaryEntryMetaData, getAllDiaryEntries, submitNewDiary }
+export { getDiaryEntryDetails, getLastFiveDiaryEntryMetaData, getAllDiaryEntries, submitNewDiary, submitNewComment }

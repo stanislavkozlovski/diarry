@@ -30,10 +30,18 @@ const DiaryDetails = React.createClass({
     })
   },
 
+  reload () {
+    getDiaryEntryDetails(this.props.params.id).then(data => {
+      this.setState(data)
+    }).catch(err => {
+      this.setState({error: err.message})
+    })
+  },
+
   render () {
     if (this.state && this.state.body) {
       return (
-        <DiaryEntry {...this.state} />
+        <DiaryEntry {...this.state} reload={this.reload} />
       )
     } else if (this.state && this.state.error) {
       return <h1 className='alert alert-danger'> {this.state.error} </h1>

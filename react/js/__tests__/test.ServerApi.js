@@ -1,4 +1,4 @@
-import { getDiaryEntryDetails, getLastFiveDiaryEntryMetaData, getAllDiaryEntries, submitNewDiary } from '../requests.js'
+import { getDiaryEntryDetails, getLastFiveDiaryEntryMetaData, getAllDiaryEntries, submitNewDiary, submitNewComment } from '../requests.js'
 import {removeJWTTokenHeader, setJWTTokenHeader} from '../testBase.js'
 
 /**
@@ -62,7 +62,20 @@ it('All Diary Details require authentication', done => {
 })
 
 it('Submit New Diary route requires authentication', done => {
+  removeJWTTokenHeader()
+  
   submitNewDiary('Test Title ', 'Test Body Test Body').then(() => {
+    throw new Error('Promise should have returned an error')
+  }).catch(err => {
+    expect(err.message).toBe("Unexpected error: Missing or Invalid JWT Token in the 'jwt-auth' header!")
+    done()
+  })
+})
+
+it('Submit New Comment route requires authentication', done => {
+  removeJWTTokenHeader()
+  
+  submitNewComment(1, 'What the f is up my man?').then(() => {
     throw new Error('Promise should have returned an error')
   }).catch(err => {
     expect(err.message).toBe("Unexpected error: Missing or Invalid JWT Token in the 'jwt-auth' header!")
