@@ -1,0 +1,105 @@
+* {
+  font-size: 14px;
+  box-sizing: border-box;
+  padding: 0px;
+  margin: 0px;
+}
+
+html, body {
+  height: 100%;
+}
+header.title-header {
+  display: block;
+  width: 100%;
+  height: 75px;
+  text-align: center;
+}
+.title-header .title {
+  font-size: 4em;
+}
+
+main {
+  background: rgb(227, 227, 227);
+  display: flex;
+  height: 100%;
+}
+aside.left-sidebar {
+  background: white;
+  flex-grow: 1;
+  margin-right: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border-right: 1px solid black;
+}
+aside.left-sidebar * {
+  text-align: center;
+}
+aside.left-sidebar > * {
+  margin-bottom: 30px;
+}
+div.new-post-container {
+  margin-bottom: 100px;
+}
+.new-post-container {
+  width: 100%;
+  background: transparent !important;  /* override the shutter in effect */
+
+}
+.new-post-container .new-post {
+  width: 100%;
+  border: none;
+  background: none;
+  font-size: 2em;
+  padding: 20px 50px;
+}
+div.new-post-container.hvr-shutter-out-horizontal::before {
+  background: black;
+}
+div.new-post-container.hvr-shutter-out-horizontal:hover * {
+  color: white;
+}
+
+.latest-posts > p, .latest-comments > p {
+  font-size: 1.5em;
+}
+.latest-posts .latest-post, .latest-comments .latest-comment {
+  margin-top: 20px;
+}
+.latest-post > p, .latest-comment > p {
+  font-size: 1.2em;
+}
+
+
+
+section.diary-entries {
+  flex-grow: 6;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+}
+
+.diary-entries .diary-entry {
+  width: 70%;
+  text-align: center;
+  background: white;
+}
+
+.diary-entry .diary-header {
+  background: black;
+  width: 40%;
+  margin: 0 auto;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+.diary-header .diary-title {
+  font-size: 2em;
+}
+.diary-header .diary-date {
+  font-style: italic;
+}
+
+.diary-header * {
+  color: white;
+}
