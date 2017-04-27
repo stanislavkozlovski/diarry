@@ -40,7 +40,7 @@ aside.left-sidebar > * {
   margin-bottom: 30px;
 }
 div.new-post-container {
-  margin-bottom: 100px;
+  margin-bottom: 10px;
 }
 .new-post-container {
   width: 100%;
@@ -61,8 +61,30 @@ div.new-post-container.hvr-shutter-out-horizontal:hover * {
   color: white;
 }
 
+div.search-box input {
+  height:35px;
+  text-align: left;
+  padding-left: 5px;
+}
+div.search-box .icon-box {
+  position: relative;
+  background: #000000;
+  width: 30%;
+  height: 35px;
+  top: 35px;
+  left: 125px;
+}
+div.search-box span {
+
+}
+
+.latest-posts, .latest-comments {
+  width: 200px;
+}
+
 .latest-posts > p, .latest-comments > p {
   font-size: 1.5em;
+  border-bottom: 1px solid black;
 }
 .latest-posts .latest-post, .latest-comments .latest-comment {
   margin-top: 20px;
@@ -71,10 +93,31 @@ div.new-post-container.hvr-shutter-out-horizontal:hover * {
   font-size: 1.2em;
 }
 
+.latest-post, .latest-comment {
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: te;
+  animation-duration: 1s;
+  color: black;
+  background: white;
+  transition: all ease 1s;
+}
+.latest-post *, .latest-comment * {
+  transition: all linear 0.3s; /* TODO: Faster*/
+}
+.latest-post:hover *, .latest-comment:hover * {
+  color: white;
+}
+.latest-post:hover, .latest-comment:hover {
+  background: black;
+}
+
 
 
 section.diary-entries {
-  flex-grow: 6;
+  flex-grow: 10;
   display: flex;
   flex-direction: column;
   align-content: center;
@@ -84,6 +127,10 @@ section.diary-entries {
   width: 70%;
   text-align: center;
   background: white;
+  margin: 50px 0;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
 }
 
 .diary-entry .diary-header {
@@ -92,12 +139,26 @@ section.diary-entries {
   margin: 0 auto;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
+  margin-bottom: 30px;
 }
 .diary-header .diary-title {
   font-size: 2em;
+  padding-bottom: 10px;
 }
 .diary-header .diary-date {
   font-style: italic;
+  padding-top: 10px;
+  padding-bottom: 5px;
+}
+.diary-content {
+  text-align: left;
+  padding: 20px;
+  flex-grow: 1;
+}
+.diary-footer {
+  text-align: right;
+  padding-right:30px;
+  padding-bottom: 5px;
 }
 
 .diary-header * {
