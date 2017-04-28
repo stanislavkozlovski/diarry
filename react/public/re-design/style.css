@@ -19,19 +19,16 @@ header.title-header {
 }
 
 main {
-  background: rgb(227, 227, 227);
   display: flex;
   height: 100%;
 }
 aside.left-sidebar {
   background: white;
   flex-grow: 1;
-  margin-right: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  border-right: 1px solid black;
 }
 aside.left-sidebar * {
   text-align: center;
@@ -126,11 +123,14 @@ div.search-box span i {
 }
 
 
-
+/*************** DIARY ENTRIES ***************/
 section.diary-entries {
+  background: rgb(227, 227, 227);
+  padding-left: 100px;
   flex-grow: 10;
   display: flex;
   flex-direction: column;
+  border-left: 1px solid black;
   align-content: center;
 }
 
@@ -184,4 +184,86 @@ section.diary-entries {
 
 .diary-header * {
   color: white;
+}
+/*************** DIARY ENTRIES ***************/
+
+/*************** NEW DIARY PAGE ***************/
+.new-diary-post {
+  padding-left: 100px;
+  flex-grow: 10;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid black;
+  align-content: center;
+}
+
+.new-diary-form {
+  height: 80%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.new-diary-header {
+  margin-top: 75px;
+  background: black;
+  border-radius: 5px;
+  color: white;
+  width: 50%;
+  height: 110px;
+  align-self: center;
+  /*margin-left: -100px; !* Ignore the padding *!*/
+  text-align: center;
+}
+
+.new-diary-header .new-diary-name {
+  font-size: 2.7em;
+  border: none;
+  border-bottom: 1px solid white;
+  text-align: center;
+  padding-top: 5px;
+  padding-bottom: 12px;
+  width: 90%;
+  margin: 0 auto;
+  background: black;
+  color: white;
+}
+.new-diary-header .new-diary-name:focus {
+  outline: none;
+}
+
+.new-diary-header .new-diary-date {
+  margin-top: 12px;
+  font-size: 1.6em;
+  padding-bottom: 10px;
+}
+
+.new-diary-post .new-diary-content {
+  margin-top: 50px;
+  resize: none;
+  font-size: 1.3em;
+  padding: 20px;
+  background: white;
+  height: 80%;
+  width: 90%;
+}
+.new-diary-post .new-diary-content:focus {
+  outline: none;
+}
+
+.new-diary-post .new-diary-submit {
+  background: black;
+  border: none;
+  border-radius: 5px;
+  width: 25%;
+  height: 10%;
+  color: white;
+  font-size: 2.4em;
+  font-weight: bold;
+  margin-top: 25px;
+}
+
+.new-diary-post .new-diary-submit:hover {
+  cursor: pointer;
 }
