@@ -267,3 +267,105 @@ section.diary-entries {
 .new-diary-post .new-diary-submit:hover {
   cursor: pointer;
 }
+
+/*************** NEW DIARY PAGE ***************/
+
+
+/*************** DIARY DETAILS PAGE ***************/
+
+.diary-details {
+  height: 1000px;
+  flex-grow: 10;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid black;
+  align-content: center;
+}
+
+.diary-details-header {
+  margin-top: 75px;
+  background: black;
+  max-height: 90px;
+  width: 50%;
+  height: 10%;
+  align-self: center;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.diary-details-header .diary-details-title {
+  font-size: 2.3em;
+  align-self: center;
+  flex-grow: 2;
+}
+
+.diary-details-header .diary-details-date {
+  border-top: 1px solid white;
+  width: 80%;
+  font-size: 1.4em;
+  align-self: center;
+  flex-grow: 1;
+  text-align: center;
+  padding-top: 10px;
+}
+
+.diary-details-content {
+  width: 80%;
+  height: 60%;
+  max-height: 750px;
+  align-self: center;
+  padding: 20px 50px;
+  margin-top: 25px;
+  border: 1px solid black;
+}
+
+.diary-details-content * {
+  font-size: 1.5em;
+}
+.diary-details-comments {
+  width: 80%;
+    align-self: center;
+}
+.diary-details-comment {
+  border-radius: 5px;
+  height: 120px;
+  width: 65%;
+  margin-top: 25px;
+  border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+}
+
+.diary-details-comment-header {
+  background: black;
+  color: white;
+  padding: 5px 20px;
+  flex-grow: 2;
+}
+
+.diary-details-comment-header .comment-author {
+  text-align: left;
+  font-size: 1.2em;
+  font-weight: normal;
+}
+
+.diary-details-comment .diary-details-comment-content {
+  padding: 10px 20px;
+  flex-grow: 12;
+}
+
+.diary-details-comment-footer {
+  background: black;
+  width: 18%;
+  align-self: flex-end;
+  border-top-left-radius: 5px;
+  color: white;
+  text-align: left;
+  flex-grow: 2;
+}
+
+.diary-details-comment-footer p {
+  font-size: 1.2em;
+  text-align: center;
+}
