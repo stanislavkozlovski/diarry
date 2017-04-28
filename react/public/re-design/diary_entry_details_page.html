@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Diarry</title>
   <link href="hover.css" type="text/css" rel="stylesheet">
   <link href="style.css" type="text/css" rel="stylesheet">
@@ -91,13 +92,8 @@
   </main>
 
 <script type="text/javascript">
-  console.log("WTF");
   var commentsElement = document.getElementsByClassName("diary-details-comments")[0];
   var commentCount = commentsElement.getElementsByClassName('diary-details-comment').length;
-  console.log(commentCount);
-  console.log(commentCount);
-  console.log(commentCount);
-  console.log(commentCount);
   document.getElementsByClassName('diary-details')[0].style.height = (800 + (125 * commentCount)) + "px";
 </script>
 </body>

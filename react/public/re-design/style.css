@@ -180,6 +180,10 @@ section.diary-entries {
   text-align: right;
   padding-right:30px;
   padding-bottom: 5px;
+  background: black;
+  color: white;
+  font-style: italic;
+  font-size: 1.1em;
 }
 
 .diary-header * {
@@ -368,4 +372,91 @@ section.diary-entries {
 .diary-details-comment-footer p {
   font-size: 1.2em;
   text-align: center;
+}
+
+@media all and (max-width: 768px) {
+  main {
+    display: inherit;
+  }
+  /********    LEFT SIDEBAR    ********/
+  aside.left-sidebar {
+    display: inherit;
+  }
+  .new-post-container {
+    display: block;
+  }
+  div.search-box {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  div.search-box input {
+    width: 100%;
+  }
+  div.search-box .icon-box {
+    align-self: flex-end;
+    left: 0px;
+  }
+  .latest-posts, .latest-comments {
+    margin: 0 auto;
+    width: 100%;
+  }
+  .latest-posts > .latest-post, .latest-comments > .latest-comment {
+    display: inline-block;
+    margin: 0 10px;
+  }
+  /********    LEFT SIDEBAR    ********/
+
+  /********    NEW DIARY    ********/
+  .new-diary-post {
+    padding-left: 0;
+    border: none;
+  }
+  .new-diary-form {
+    height: 850px;
+  }
+  .new-diary-header {
+    width: 100%;
+  }
+  .new-diary-post .new-diary-submit {
+    width: 100%;
+  }
+  /********    NEW DIARY    ********/
+
+  /********    DIARY DETAILS    ********/
+  .diary-details {
+    border: none;
+  }
+  .diary-details .diary-details-header {
+    width: 100%;
+  }
+  .diary-details-content {
+    width: 100%;
+    padding: 20px 10px;
+  }
+  .diary-details-comment {
+    width: 90%;
+  }
+  .diary-details-comment-footer {
+    width: 40%;
+  }
+  /********    DIARY DETAILS    ********/
+
+  /********    DIARY ENTRIES    ********/
+  section.diary-entries {
+    padding: 0;
+    border: none;
+  }
+  .diary-entries .diary-entry {
+    margin: 20px auto;
+    width: 90%;
+  }
+  .diary-entry .diary-header {
+    width: 80%;
+  }
+  .diary-entry .diary-footer {
+    background: black;
+    color: white;
+  }
+  /********    DIARY ENTRIES    ********/
 }
