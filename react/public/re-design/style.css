@@ -47,6 +47,9 @@ div.new-post-container {
   background: transparent !important;  /* override the shutter in effect */
 
 }
+.new-post-container:hover {
+  cursor: pointer !important;
+}
 .new-post-container .new-post {
   width: 100%;
   border: none;
@@ -67,15 +70,19 @@ div.search-box input {
   padding-left: 5px;
 }
 div.search-box .icon-box {
+  cursor: pointer;
   position: relative;
   background: #000000;
   width: 30%;
   height: 35px;
   top: 35px;
   left: 125px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-div.search-box span {
-
+div.search-box span i {
+  font-size: 24px;
 }
 
 .latest-posts, .latest-comments {
@@ -109,9 +116,13 @@ div.search-box span {
 }
 .latest-post:hover *, .latest-comment:hover * {
   color: white;
+  cursor: pointer;
 }
 .latest-post:hover, .latest-comment:hover {
   background: black;
+}
+.new-post {
+  cursor: pointer;
 }
 
 
@@ -126,11 +137,21 @@ section.diary-entries {
 .diary-entries .diary-entry {
   width: 70%;
   text-align: center;
+  box-shadow: 2px 2px 5px black;
   background: white;
   margin: 50px 0;
   height: 300px;
   display: flex;
   flex-direction: column;
+  transition: 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  -webkit-font-smoothing: subpixel-antialiased;
+  vertical-align: inherit !important;  /* Fixes text blurriness while zoomign in on hvr-glow*/
+
+}
+
+.diary-entries .diary-entry:hover {
+  cursor: pointer;
+  box-shadow: 0px 0px 20px lime;
 }
 
 .diary-entry .diary-header {
