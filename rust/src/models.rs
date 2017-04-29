@@ -61,6 +61,25 @@ pub struct WholeDiaryEntry {
 }
 
 #[derive(Debug)]
+#[derive(Serialize)]
+#[derive(Deserialize)]
+pub struct LandingPageDiaryEntry {
+    /* The same DiaryEntry we know dearly, this time with a comments_count field denoting the number of comments */
+    pub id: i32,
+    pub title: String,
+    pub body: String,
+    pub creation_date: NaiveDate,
+    pub creation_time: NaiveTime,
+    pub comments_count: i32
+}
+
+impl PartialEq for LandingPageDiaryEntry {
+  fn eq(&self, other: &LandingPageDiaryEntry) -> bool {
+        return self.id == other.id;
+    }  
+}
+
+#[derive(Debug)]
 #[derive(Identifiable, Queryable, Associations)]
 #[derive(Serialize)]
 #[derive(Deserialize)]

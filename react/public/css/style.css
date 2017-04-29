@@ -131,7 +131,7 @@ div.search-box span i {
   transition: all linear 0.3s; /* TODO: Faster*/
 }
 .latest-post:hover *, .latest-comment:hover * {
-  color: white;
+  color: white !important;
   cursor: pointer;
 }
 .latest-post:hover, .latest-comment:hover {

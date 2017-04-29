@@ -55,6 +55,8 @@ const DiaryEntry = React.createClass({
         entryBody = entryBody.substring(0, 500) + '...'
       }
       // TODO: Don't build URL here dumbass
+      let commentCount = this.props.comments_count
+
       return (
         <div className='diary-entry hvr-grow'>
           <Link to={`/entry/${this.props.id}`}>
@@ -69,7 +71,7 @@ const DiaryEntry = React.createClass({
             </div>
 
             <footer className='diary-footer'>
-              <p className='diary-comments-count'>10 comments :)</p>
+              <p className='diary-comments-count'>{commentCount} comments {commentCount > 0 ? ':)' : ':('}</p>
             </footer>
           </Link>
         </div>
@@ -124,7 +126,6 @@ const DiaryEntry = React.createClass({
             )
           })}
         </div>
-        
       </div>
     )
   }

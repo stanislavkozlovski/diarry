@@ -26,7 +26,7 @@ const DiaryDetails = React.createClass({
   componentDidMount () {
     /* query the backend for details for a specific DiaryEntry and show it to the user */
     if (this.props.location.pathname === '/entry/new') { return }  // hacky way to avoid /entry/new matching this id
-  
+
     getDiaryEntryDetails(this.props.params.id).then(data => {
       this.setState(data)
     }).catch(err => {

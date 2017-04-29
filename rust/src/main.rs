@@ -34,7 +34,7 @@ use rocket::http::Method;
 use rocket::Response;
 use rocket::data::Data;
 use cors::{CORS, PreflightCORS};
-use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo, DiaryOwner, NewDiaryOwner, DiaryComment, WholeDiaryEntry, DeserializableDiaryComment};
+use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo, DiaryOwner, NewDiaryOwner, DiaryComment, WholeDiaryEntry, DeserializableDiaryComment, LandingPageDiaryEntry};
 use std::io::Read;
 
 
@@ -49,6 +49,19 @@ fn create_whole_diary_entry(conn: &PgConnection, diary_entry: &DiaryEntry) -> Wh
         comments:  db_queries::fetch_all_comments_belonging_to_diary_entry(conn, diary_entry)
     };
     return whole_diary;
+}
+
+fn create_landing_page_diary_entry(conn: &PgConnection, diary_entry: &DiaryEntry) -> LandingPageDiaryEntry {
+    let landing_page_diary = LandingPageDiaryEntry {
+        id: diary_entry.id,
+        title: diary_entry.title.clone(),
+        body: diary_entry.body.clone(),
+        creation_date: diary_entry.creation_date.clone(),
+        creation_time: diary_entry.creation_time.clone(),
+        comments_count:  db_queries::fetch_all_comments_belonging_to_diary_entry(conn, diary_entry).len() as i32
+    };
+
+    return landing_page_diary;
 }
 
 #[post("/api/entries/new", format = "application/json", data = "<new_entry>")]
@@ -141,10 +154,12 @@ rank route param
 }
 
 #[get("/api/entries/all")]
-fn all_diary_entries_controller(owner: DiaryOwner) -> CORS<JSON<Vec<DiaryEntry>>> {
+fn all_diary_entries_controller(owner: DiaryOwner) -> CORS<JSON<Vec<LandingPageDiaryEntry>>> {
     /* Return all the Diary Entries, ordered by their date descending */
     let connection: PgConnection = db_queries::establish_connection();
-    CORS::any(JSON(db_queries::fetch_all_diary_entries(&connection, true)))
+    let all_entries: Vec<DiaryEntry> = db_queries::fetch_all_diary_entries(&connection, true);
+    let landing_entries: Vec<LandingPageDiaryEntry> = all_entries.into_iter().map(|a| create_landing_page_diary_entry(&connection, &a)).collect();
+    CORS::any(JSON(landing_entries))
 }
 
 #[get("/api/entries/last_five")]
@@ -258,7 +273,7 @@ mod tests {
     use diesel::prelude::*;
     
     use diesel::pg::PgConnection;
-    use models::{DiaryEntry, DiaryEntryMetaInfo};
+    use models::{DiaryEntry, DiaryEntryMetaInfo, LandingPageDiaryEntry};
     #[test]
     fn test_fetch_diary_entry_should_return_corresponding_entry() {
         dotenv().ok();
@@ -289,6 +304,7 @@ mod tests {
         dotenv().ok();
         let connection: PgConnection = establish_connection();
         let expected_entries: Vec<DiaryEntry> = diary_entries.order((creation_date.desc(), creation_time.desc())).load::<DiaryEntry>(&connection).unwrap();
+        
         let received_entries = fetch_all_diary_entries(&connection, true);
         assert_eq!(received_entries, expected_entries);
     }
@@ -296,6 +312,7 @@ mod tests {
     use rocket_contrib::JSON;
     use all_diary_entries_controller;
     use std::ops::Deref;
+    use create_landing_page_diary_entry;
     #[test]
     fn test_all_diary_entries_controller_should_return_all_entries_in_json_ordered() {
         /* the controller should return all the entries ordered by date and time desc */
@@ -303,7 +320,9 @@ mod tests {
         
         dotenv().ok();
         let connection: PgConnection = establish_connection();
-        let expected_entries: JSON<Vec<DiaryEntry>> = JSON(diary_entries.order((creation_date.desc(), creation_time.desc())).load::<DiaryEntry>(&connection).unwrap());
+        // convert the entries to LandingPageEntries
+        let landing_entries: Vec<LandingPageDiaryEntry> = diary_entries.order((creation_date.desc(), creation_time.desc())).load::<DiaryEntry>(&connection).unwrap().into_iter().map(|a| create_landing_page_diary_entry(&connection, &a)).collect();
+        let expected_entries: JSON<Vec<LandingPageDiaryEntry>> = JSON(landing_entries);
         let response = all_diary_entries_controller(_author);
         let received_entries = response.get_responder().deref().deref();
         assert_eq!(received_entries, expected_entries.into_inner().deref());
