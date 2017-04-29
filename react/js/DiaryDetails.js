@@ -30,10 +30,20 @@ const DiaryDetails = React.createClass({
     })
   },
 
+  reload () {
+    getDiaryEntryDetails(this.props.params.id).then(data => {
+      this.setState(data)
+    }).catch(err => {
+      this.setState({error: err.message})
+    })
+  },
+
   render () {
+    if (this.props.location.pathname === '/entry/new') { return <div /> }  // hacky way to avoid /entry/new matching this id
+
     if (this.state && this.state.body) {
       return (
-        <DiaryEntry {...this.state} />
+        <DiaryEntry {...this.state} reload={this.reload} />
       )
     } else if (this.state && this.state.error) {
       return <h1 className='alert alert-danger'> {this.state.error} </h1>

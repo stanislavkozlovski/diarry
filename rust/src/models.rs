@@ -12,20 +12,22 @@ use jwt::error::Error as JwtErrorEnum;
 use jwt::header::Header as JwtHeader;
 use jwt::claims::Claims as JwtClaims;
 use jwt::{Component, Error as JwtError};
-
+use diesel::associations::Identifiable;
 use db_queries::{ establish_connection, fetch_user_with_jwt };
+use schema::diary_comments;
 
- 
 #[derive(Debug)]
-#[derive(Queryable)]
 #[derive(Deserialize)]
 #[derive(Serialize)]
+#[table_name="diary_entries"]
+#[has_many(diary_comments, foreign_key="entry_id")]
+#[derive(Identifiable, Queryable, Associations)]
 pub struct DiaryEntry {
     pub id: i32,
     pub title: String,
     pub body: String,
-    pub date: NaiveDate,
-    pub time: NaiveTime
+    pub creation_date: NaiveDate,
+    pub creation_time: NaiveTime
 }
 
 impl PartialEq for DiaryEntry {
@@ -43,6 +45,54 @@ impl DiaryEntry {
         return format!("/entry/{}", &self.id)
     }
 }
+
+#[derive(Debug)]
+#[derive(Serialize)]
+#[derive(Deserialize)]
+pub struct WholeDiaryEntry {
+    /* The full DiaryEntry struct, which is meant to be deserialized and sent down the network.
+    Holds all the comments for the specific diary entry*/
+    pub id: i32,
+    pub title: String,
+    pub body: String,
+    pub creation_date: NaiveDate,
+    pub creation_time: NaiveTime,
+    pub comments: Vec<DiaryComment>
+}
+
+#[derive(Debug)]
+#[derive(Identifiable, Queryable, Associations)]
+#[derive(Serialize)]
+#[derive(Deserialize)]
+#[table_name="diary_comments"]
+#[belongs_to(DiaryEntry, foreign_key="entry_id")]
+pub struct DiaryComment {
+    id: i32,
+    pub entry_id: i32,
+    body: String,
+    pub creation_date: NaiveDate,
+    pub creation_time: NaiveTime
+}
+
+impl PartialEq for DiaryComment {
+    fn eq(&self, other: &DiaryComment) -> bool {
+        return self.id == other.id;
+    }
+}
+
+#[derive(Insertable)]
+#[table_name="diary_comments"]
+pub struct NewDiaryComment {
+    pub entry_id: i32,
+    pub body: String    
+}
+
+#[derive(Deserialize)]
+pub struct DeserializableDiaryComment {
+    /* Used simply to enable us to parse the POST data from the new comment endpoint*/
+    pub body: String
+}
+
 #[derive(Deserialize)]
 #[derive(Insertable)]
 #[table_name="diary_entries"]
@@ -79,8 +129,8 @@ pub struct NewDiaryOwner {
 #[derive(Debug)]
 #[derive(Queryable)]
 pub struct DiaryOwner {
-    id: i32,
-    email: String,
+    pub id: i32,
+    pub email: String,
     pub password: String,
     pub jwt: Option<String>
 }

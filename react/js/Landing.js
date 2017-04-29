@@ -15,13 +15,13 @@ const LandingPage = React.createClass({
   render () {
     if (this.state && this.state.diaryEntries) {
       return (
-        <div>
+        <section className='diary-entries'>
           {
             this.state.diaryEntries.map(entry => {
-              return <DiaryEntry {...entry} key={entry.id} />
+              return <DiaryEntry {...entry} key={entry.id} isMetaInfo />
             })
           }
-        </div>
+        </section>
       )
     } else {
       return (

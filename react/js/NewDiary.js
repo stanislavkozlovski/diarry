@@ -8,10 +8,9 @@ const NewDiary = React.createClass({
   getInitialState () {
     // TODO: !!! Make it remember last body if you accidentally navigated off
     return {
-      title: '',
+      title: 'New Diary',
       body: '',
       timeouts: [],
-      badTitle: false,
       showAlert: false,
       alertTitle: '',
       alertDesc: ''
@@ -19,21 +18,7 @@ const NewDiary = React.createClass({
   },
 
   handleTitleInput (event) {
-    // Set a timeout that makes the input box glow red if its too short
     let newTitleText = event.target.value
-    if (newTitleText.length <= 5) {
-      this.state.timeouts.push(setTimeout(() => {
-        if (newTitleText.length <= 5 && !this.state.showAlert) {
-          this.setState({badTitle: true})
-        }
-      }, 100))
-    } else {
-      // clear timeouts
-      for (var i = 0; i < this.state.timeouts.length; i++) {
-        clearTimeout(this.state.timeouts[i])
-      }
-      this.setState({badTitle: false})
-    }
 
     this.setState({title: newTitleText})
   },
@@ -46,7 +31,6 @@ const NewDiary = React.createClass({
     event.preventDefault()
     let diaryTitle = this.state.title
     let diaryBody = this.state.body
-
     if (diaryTitle.length <= 5) {
       this.state.showAlert = true
       this.setState({ showAlert: true, alertTitle: 'Title Too Short!', alertDesc: 'The title you entered is shorter than 5 characters!' })
@@ -60,9 +44,17 @@ const NewDiary = React.createClass({
   },
 
   render () {
-    let titleClass = this.state.badTitle ? 'new-entry-title new-entry-bad-title' : 'new-entry-title'
+    const currDate = new Date()
+    const shortMonth = currDate.toLocaleDateString('en-us', { month: 'short' })
+    const day = currDate.getDate()
+    const year = currDate.getFullYear()
+    const currMinutes = currDate.getMinutes()
+    const minutesString = (currMinutes < 10 ? '0' : '') + currMinutes
+    const timeStr = `${currDate.getHours()}:${minutesString}`
+    const dateString = `${shortMonth} ${day} ${year} - ${timeStr}`
+
     return (
-      <section className='box post post-excerp'>
+      <section className='new-diary-post'>
         <SweetAlert
           type='error'
           show={this.state.showAlert}
@@ -70,12 +62,14 @@ const NewDiary = React.createClass({
           text={this.state.alertDesc}
           onConfirm={() => this.setState({ showAlert: false })}
         />
-        <form onSubmit={this.handleNewDiarySubmit}>
-          <div className='new-entry-header'>
-            <h1 className='new-entry'>New Entry</h1>
+        <form className='new-diary-form' onSubmit={this.handleNewDiarySubmit} >
+          <div className='new-diary-header'>
+            <input value={this.state.title} className='new-diary-name' onChange={this.handleTitleInput} />
+            <h3 className='new-diary-date'>{`${dateString}`}</h3>
           </div>
-          <input name='title' placeholder='The title of your entry' className={titleClass} onChange={this.handleTitleInput} />
-          <textarea name='body' className='entry-body' onChange={this.handleBodyInput} />
+
+          <textarea className='new-diary-content' onChange={this.handleBodyInput} />
+          <button className='new-diary-submit hvr-grow'>Submit</button>
         </form>
       </section>
     )

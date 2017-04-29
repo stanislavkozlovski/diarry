@@ -1,4 +1,5 @@
 #![feature(plugin)]
+// #![feature(custom_attribute)]
 #![plugin(rocket_codegen)]
 extern crate rocket;
 #[macro_use] extern crate rocket_contrib;
@@ -31,12 +32,24 @@ use rocket::http::hyper::header::{Headers, AccessControlAllowOrigin, AccessContr
 use rocket::http::{Status, ContentType};
 use rocket::http::Method;
 use rocket::Response;
-
+use rocket::data::Data;
 use cors::{CORS, PreflightCORS};
-use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo, DiaryOwner, NewDiaryOwner};
+use self::models::{DiaryEntry, NewDiaryEntry, ErrorDetails, DiaryEntryMetaInfo, DiaryOwner, NewDiaryOwner, DiaryComment, WholeDiaryEntry, DeserializableDiaryComment};
+use std::io::Read;
 
 
-
+fn create_whole_diary_entry(conn: &PgConnection, diary_entry: &DiaryEntry) -> WholeDiaryEntry {
+    /* Creates a WholeDiaryEntry from a DiaryEntry struct*/
+    let whole_diary = WholeDiaryEntry {
+        id: diary_entry.id,
+        title: diary_entry.title.clone(),
+        body: diary_entry.body.clone(),
+        creation_date: diary_entry.creation_date.clone(),
+        creation_time: diary_entry.creation_time.clone(),
+        comments:  db_queries::fetch_all_comments_belonging_to_diary_entry(conn, diary_entry)
+    };
+    return whole_diary;
+}
 
 #[post("/api/entries/new", format = "application/json", data = "<new_entry>")]
 fn new_diary_controller(new_entry: JSON<NewDiaryEntry>, owner: DiaryOwner) -> CORS<Result<JSON<DiaryEntryMetaInfo>, JSON<ErrorDetails>>> {
@@ -52,6 +65,29 @@ fn new_diary_controller(new_entry: JSON<NewDiaryEntry>, owner: DiaryOwner) -> CO
         .status(Status::Created)
 }
 
+#[post("/api/entries/<entry_id>/comments/new", format = "application/json", data = "<deser_comment>")]
+fn new_comment_controller(entry_id: i32, deser_comment: JSON<DeserializableDiaryComment>, owner: DiaryOwner) -> CORS<Result<JSON<DiaryComment>, JSON<ErrorDetails>>> {
+    let mut comment_body: String = String::from(deser_comment.into_inner().body);
+
+    if comment_body.len() <= 3 || comment_body.len() > 1000 {
+        let json_err = JSON(ErrorDetails{ error_message: String::from("The length of the comment body must be greater than 3 characters and less than 1000!") });
+        return CORS::any(Err(json_err))
+            .status(Status::BadRequest);
+    }
+    // get the diary entry
+    let conn: PgConnection = db_queries::establish_connection();
+    let entry = db_queries::fetch_diary_entry(&conn, entry_id);
+    if entry.is_none() {
+        let json_err = JSON(ErrorDetails{ error_message: String::from(format!("DiaryEntry with ID {} does not exist!!", entry_id)) });
+        return CORS::any(Err(json_err))
+            .status(Status::BadRequest);
+    }
+
+    let new_comment: DiaryComment = db_queries::create_diary_comment(&conn, &comment_body.as_str(), entry_id);
+
+    CORS::any(Ok(JSON(new_comment)))
+        .status(Status::Created)
+}
 #[route(OPTIONS, "/api/entries/new")]
 fn cors_preflight() -> PreflightCORS {
     CORS::preflight("*")
@@ -76,7 +112,8 @@ rank route param
 
 
     */
-    let diary_entry: Option<DiaryEntry> = db_queries::fetch_diary_entry(&db_queries::establish_connection(), id);
+    let conn: PgConnection = db_queries::establish_connection();
+    let diary_entry: Option<DiaryEntry> = db_queries::fetch_diary_entry(&conn, id);
 
     if diary_entry.is_none() {
         let error_message = ErrorDetails{ error_message: String::from(format!("Could not find a Diary Entry with ID {}", id)) };
@@ -90,12 +127,13 @@ rank route param
                 .finalize();
     }
 
+    let whole_diary_entry: WholeDiaryEntry = create_whole_diary_entry(&conn, &diary_entry.unwrap());
     let response: Response = Response::build()
      .status(Status::Ok)
      .header(ContentType::JSON)
      .header(AccessControlAllowOrigin::Any)
      .sized_body(Cursor::new(
-         json!(diary_entry.unwrap()).to_string()
+         json!(whole_diary_entry).to_string()
          ))
      .finalize();
 
@@ -165,7 +203,7 @@ fn main() {
     dotenv().ok();
     db_queries::seed_diary_owner();
     rocket::ignite()
-        .mount("/", routes![new_diary_controller, diary_details_controller, all_diary_entries_controller, last_five_diary_entries_controller, cors_preflight, cors_preflight_auth, login_auth_controller])
+        .mount("/", routes![new_diary_controller, diary_details_controller, all_diary_entries_controller, last_five_diary_entries_controller, cors_preflight, cors_preflight_auth, login_auth_controller, new_comment_controller])
         .catch(errors![fallback_unauthenticated])
         .launch();
 }
@@ -187,23 +225,25 @@ mod tests {
     use diary_details_controller;
     #[test]
     fn test_details_should_return_correct_entry_and_200() {
+        let _author = DiaryOwner {id: 1, email: String::from("manage@abv.bg"), password: String::from("123"), jwt: Some(String::from("W"))};
         dotenv().ok();
-        let mut response: Response = diary_details_controller(1);
+        let mut response: Response = diary_details_controller(1, _author);
 
         let expected_entry = fetch_diary_entry(&establish_connection(), 1).unwrap();
-        let received_entry: DiaryEntry = serde_json::from_str(
+        let received_entry: WholeDiaryEntry = serde_json::from_str(
             &response.body().unwrap().into_string().unwrap()
             ).unwrap();
 
-        assert_eq!(received_entry, expected_entry);
+        assert_eq!(received_entry.id, expected_entry.id);
         assert_eq!(response.status().code, 200);
     }
     use rocket::Response;
     use models::ErrorDetails;
     #[test]
     fn test_details_should_return_error_message_and_404() {
+        let _author = DiaryOwner {id: 1, email: String::from("manage@abv.bg"), password: String::from("123"), jwt: Some(String::from("W"))};
         dotenv().ok();
-        let mut response: Response = diary_details_controller(i32::max_value());
+        let mut response: Response = diary_details_controller(i32::max_value(), _author);
         let error_details: ErrorDetails = serde_json::from_str(
                 &response.body().unwrap().into_string().unwrap()
             ).unwrap();
@@ -259,10 +299,12 @@ mod tests {
     #[test]
     fn test_all_diary_entries_controller_should_return_all_entries_in_json_ordered() {
         /* the controller should return all the entries ordered by date and time desc */
+        let _author = DiaryOwner {id: 1, email: String::from("manage@abv.bg"), password: String::from("123"), jwt: Some(String::from("W"))};
+        
         dotenv().ok();
         let connection: PgConnection = establish_connection();
         let expected_entries: JSON<Vec<DiaryEntry>> = JSON(diary_entries.order((creation_date.desc(), creation_time.desc())).load::<DiaryEntry>(&connection).unwrap());
-        let response = all_diary_entries_controller();
+        let response = all_diary_entries_controller(_author);
         let received_entries = response.get_responder().deref().deref();
         assert_eq!(received_entries, expected_entries.into_inner().deref());
     }
@@ -280,10 +322,10 @@ mod tests {
             let ref newer_entry: DiaryEntry = received_entries[i];
             for j in i+1..received_entries.len() {
                 let ref older_entry: DiaryEntry = received_entries[j];
-                if newer_entry.date == older_entry.date {
-                    assert!(newer_entry.time >= older_entry.time);
+                if newer_entry.creation_date == older_entry.creation_date {
+                    assert!(newer_entry.creation_time >= older_entry.creation_time);
                 } else {
-                    assert!(newer_entry.date > older_entry.date);
+                    assert!(newer_entry.creation_date > older_entry.creation_date);
                 }
             }
         }
@@ -304,10 +346,11 @@ mod tests {
     #[test]
     fn test_last_five_diary_entries_controller_returns_correct_entries() {
         use schema::diary_entries::dsl::{creation_date, creation_time};
+        let _author = DiaryOwner {id: 1, email: String::from("manage@abv.bg"), password: String::from("123"), jwt: Some(String::from("W"))};
         dotenv().ok();
         let connection: PgConnection = establish_connection();
         let expected_entries: Vec<DiaryEntry> = diary_entries.order((creation_date.desc(), creation_time.desc())).limit(5).load::<DiaryEntry>(&connection).unwrap();
-        let response = last_five_diary_entries_controller();
+        let response = last_five_diary_entries_controller(_author);
         let received_entries: &Vec<DiaryEntryMetaInfo> = response.get_responder().deref();
 
         assert_eq!(expected_entries.len(), received_entries.len());
@@ -346,6 +389,29 @@ mod tests {
         let received_owner: Option<DiaryOwner> = fetch_user_with_jwt(&connection, real_owner.jwt.clone().unwrap());
         assert!(received_owner.is_some());
         assert_eq!(real_owner, received_owner.unwrap());
+    }
+    use models::DiaryComment;
+    use models::WholeDiaryEntry;
+    use create_whole_diary_entry;
+    #[test]
+    fn test_create_whole_diary_entry_creates_entry_fills_comments() {
+        dotenv().ok();
+        let connection: PgConnection = establish_connection();
+        let sample_entry: DiaryEntry = diary_entries.find(1).first(&connection).unwrap();
+        let expected_commments: Vec<DiaryComment> = DiaryComment::belonging_to(&sample_entry).load(&connection).unwrap();
+
+        let whole_entry: WholeDiaryEntry = create_whole_diary_entry(&connection, &sample_entry);
+
+        assert_eq!(whole_entry.id, sample_entry.id);
+        assert_eq!(whole_entry.title, sample_entry.title);
+        assert_eq!(whole_entry.body, sample_entry.body);
+        assert_eq!(whole_entry.creation_date, sample_entry.creation_date);
+        assert_eq!(whole_entry.creation_time, sample_entry.creation_time);
+        // assert that the comments are equal
+        assert_eq!(whole_entry.comments.len(), expected_commments.len());
+        for comment_idx in 0..expected_commments.len() {
+            assert_eq!(whole_entry.comments[comment_idx], expected_commments[comment_idx]);
+        }
     }
 
     // use seed_diary_owner;
