@@ -51,8 +51,8 @@ const DiaryEntry = React.createClass({
       }
       // TODO: Don't build URL here dumbass
       return (
-        <Link to={`/entry/${this.props.id}`}>
-          <div className='diary-entry hvr-grow'>
+        <div className='diary-entry hvr-grow'>
+          <Link to={`/entry/${this.props.id}`}>
             <header className='diary-header'>
               <h2 className='diary-title'>{this.props.title}</h2>
               <div style={borderStyle} />
@@ -66,8 +66,8 @@ const DiaryEntry = React.createClass({
             <footer className='diary-footer'>
               <p className='diary-comments-count'>10 comments :)</p>
             </footer>
-          </div>
-        </Link>
+          </Link>
+        </div>
       )
     }
 

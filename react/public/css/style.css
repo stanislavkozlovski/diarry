@@ -145,7 +145,8 @@ div.search-box span i {
 /*************** DIARY ENTRIES ***************/
 section.diary-entries {
   background: rgb(227, 227, 227);
-  padding-left: 100px;
+  /*padding-left: 100px;*/
+  overflow: hidden;
   flex-grow: 10;
   display: flex;
   flex-direction: column;
@@ -167,7 +168,7 @@ div.diary-details-entry {
   text-align: center;
   box-shadow: 2px 2px 5px black;
   background: white;
-  margin: 50px 0;
+  margin: 50px auto;
   height: 300px;
   display: flex;
   flex-direction: column;
@@ -175,6 +176,11 @@ div.diary-details-entry {
   -webkit-font-smoothing: subpixel-antialiased;
   vertical-align: inherit !important;  /* Fixes text blurriness while zoomign in on hvr-glow*/
 
+}
+.diary-entry a {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .diary-entries .diary-entry:hover {
@@ -508,6 +514,7 @@ div.diary-details-entry {
   section.diary-entries {
     padding: 0;
     border: none;
+    overflow: hidden;
   }
   .diary-entries .diary-entry {
     margin: 20px auto;
