@@ -8,12 +8,12 @@ import LandingPage from './Landing.js'
 import NewDiary from './NewDiary.js'
 import Sidebar from './Sidebar.js'
 import Auth from './auth.js'
-import '../public/css/third-party/core-desktop.css'
-import '../public/css/third-party/core-1200px.css'
-import '../public/css/third-party/core-noscript.css'
-import '../public/css/third-party/core.css'
-import '../public/css/style-desktop.css'
-import '../public/css/style-1200px.css'
+// import '../public/css/third-party/core-desktop.css'
+// import '../public/css/third-party/core-1200px.css'
+// import '../public/css/third-party/core-noscript.css'
+// import '../public/css/third-party/core.css'
+// import '../public/css/style-desktop.css'
+// import '../public/css/style-1200px.css'
 import '../public/css/style.css'
 import Login from './Login.js'
 
@@ -27,9 +27,7 @@ const App = React.createClass({
     if (!Auth.isUserAuthenticated()) {
       return <Login />
     }
-
-    return (
-      <div className='app'>
+    /* <div className='app'>
         <div id='wrapper'>
           <div id='content' className='mobileUI-main-content'>
             <div id='content-inner'>
@@ -38,8 +36,21 @@ const App = React.createClass({
               <Match exactly pattern='/' component={LandingPage} />
             </div>
           </div>
-          <Sidebar />
         </div>
+      </div> */
+    return (
+      <div>
+        <header className='title-header'>
+          <div className='title-box'>
+            <h1 className='title'>Diarry</h1>
+          </div>
+        </header>
+        <main>
+          <Sidebar />
+          <Match exactly pattern='/entry/new' component={NewDiary} />
+          <Match exactly pattern='/entry/:id' component={DiaryDetails} />
+          <Match exactly pattern='/' component={LandingPage} />
+        </main>
       </div>
     )
   }

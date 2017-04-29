@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router'
+import { Link, Redirect } from 'react-router'
 import {getLastFiveDiaryEntryMetaData} from './requests.js'
 
 import InfiniteCalendar from 'react-infinite-calendar'
@@ -46,56 +46,45 @@ const Sidebar = React.createClass({
         />
       )
     }
+    // <li><a href='#' onClick={this.handleShowCalendar}>Search by date</a></li>
+    // <p> <strong>Diarry:</strong> A personal diary written in Rocket.rs and React.js! </p>
     return (
-      <div id='sidebar'>
-        <div id='logo'>
-          <h1 className='mobileUI-site-name'>Username's Diary</h1>
+      <aside className='left-sidebar'>
+        <div className='new-post-container hvr-shutter-out-horizontal'>
+          <Link to={'/entry/new'}><button className='new-post'>New Post</button></Link>
         </div>
-        <Link to='/entry/new'>
-          <div id='newEntry'>
-            <h1 className='mobileUI-site-name'>New Entry</h1>
+
+        <div className='search-box'>
+          <div className='icon-box'>
+            <span><i className='fa fa-search' aria-hidden='true' style={{color: 'white'}} /></span>
           </div>
-        </Link>
-        <nav id='nav' className='mobileUI-site-nav'>
-          <ul>
-            <li className='current_page_item'><a href='#'>Latest Post</a></li>
-            <li><a href='#'>Archives</a></li>
-            <li><a href='#'>About Me</a></li>
-            <li><a href='#' onClick={this.handleShowCalendar}>Search by date</a></li>
-          </ul>
-          {calendar}
-        </nav>
-        <section className='is-search is-first'>
-          <form method='post' action='#'>
-            <input type='text' className='text' name='search' placeholder='Search' disabled />
-          </form>
-        </section>
-        <section className='is-text-style1'>
-          <div className='inner'>
-            <p> <strong>Diarry:</strong> A personal diary written in Rocket.rs and React.js! </p>
+          <input />
+        </div>
+        <div className='latest-posts'>
+          <p>Latest Posts</p>
+          {this.state.recentPosts.map(post => {
+            return <div className='latest-post' key={post.url} ><Link to={post.url}>{post.title}</Link></div>
+          })}
+        </div>
+
+        <div className='latest-comments'>
+          <p>Latest Comments</p>
+          <div className='latest-comment'>
+            <p>Hello</p>
           </div>
-        </section>
-        <section className='is-recent-posts'>
-          <header>
-            <h2>Recent Posts</h2>
-          </header>
-          <ul>
-            {this.state.recentPosts.map(post => {
-              return <li key={post.url} ><Link to={post.url}>{post.title}</Link></li>
-            })}
-          </ul>
-        </section>
-        <section className='is-recent-comments'>
-          <header>
-            <h2>Recent Comments</h2>
-          </header>
-          <ul>
-            <li>case on <a href='#'>Now Full Cyborg</a></li>
-            <li>molly on <a href='#'>Untitled Post</a></li>
-            <li>case on <a href='#'>Temporal Flux</a></li>
-          </ul>
-        </section>
-      </div>
+          <div className='latest-comment'>
+            <p>Hello</p>
+          </div>
+          <div className='latest-comment'>
+            <p>Hello</p>
+          </div>
+          <div className='latest-comment'>
+            <p>Hello</p>
+          </div>
+        </div>
+
+      </aside>
+
     )
   }
 })

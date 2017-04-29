@@ -39,6 +39,8 @@ const DiaryDetails = React.createClass({
   },
 
   render () {
+    if (this.props.location.pathname === '/entry/new') { return <div /> }  // hacky way to avoid /entry/new matching this id
+
     if (this.state && this.state.body) {
       return (
         <DiaryEntry {...this.state} reload={this.reload} />
