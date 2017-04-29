@@ -304,6 +304,7 @@ section.diary-entries {
   flex-grow: 2;
 }
 
+
 .diary-details-header .diary-details-date {
   border-top: 1px solid white;
   width: 80%;
@@ -372,6 +373,35 @@ section.diary-entries {
 .diary-details-comment-footer p {
   font-size: 1.2em;
   text-align: center;
+}
+
+.diary-details-new-comment {
+  align-self: center;
+  width: 80%;
+  margin-top: 20px;
+}
+.diary-details-new-comment form {
+  display: flex;
+}
+
+.diary-details-new-comment .new-comment-content {
+  border: 1px solid black;
+  resize: none;
+  padding: 20px;
+  width: 80%;
+}
+.diary-details-new-comment .new-comment-content:focus {
+  outline: none;
+}
+.new-comment-submit {
+  border: none;
+  background: black;
+  color: white;
+  font-weight: bold;
+  padding: 20px;
+  border-radius: 5px;
+  font-size: 1.4em;
+  margin-left: 20px;
 }
 
 @media all and (max-width: 768px) {
