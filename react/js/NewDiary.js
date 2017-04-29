@@ -47,7 +47,6 @@ const NewDiary = React.createClass({
 
   render () {
     const dateString = getDateObject().dateString
-    console.log(dateString)
     return (
       <section className='new-diary-post'>
         <SweetAlert

@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 
 import {submitNewComment} from './requests.js'
 import {getDateObject} from './helper.js'
+import {DIARY_DETAILS_DEFAULT_CSS_HEIGHT, DIARY_DETAILS_CSS_HEIGHT_PER_COMMENT} from './constants.js'
 
 const { array, func, string, number } = React.PropTypes
 
@@ -70,6 +71,7 @@ const DiaryEntry = React.createClass({
         </Link>
       )
     }
+
     // if we're here, this DiaryEntry must be called from DiaryDetails
     // map the user friendly dates to the article comments
     this.props.comments.map((comment) => {
@@ -80,15 +82,15 @@ const DiaryEntry = React.createClass({
       comment.timeStr = commentDate.timeDisplay
       comment.dateString = commentDate.dateString
     })
-    /* <form onSubmit={this.handleNewCommentSubmit}>
-            <div className='article-comment'>
-              <textarea name='commentBody' className='new-comment' onChange={this.handleCommentInput} />
-              <button type='submit'> COMMENT </button>
-            </div>
-          </form> */
-    // TODO: Expand style width on more comments!
+
+    // Modify the CSS height according to the amount of comments
+    let commentCount = this.props.comments.length
+    let diaryDetailsStyle = {
+      height: (DIARY_DETAILS_DEFAULT_CSS_HEIGHT + (DIARY_DETAILS_CSS_HEIGHT_PER_COMMENT * commentCount)) + 'px'
+    }
+
     return (
-      <section className='diary-details'>
+      <section className='diary-details' style={diaryDetailsStyle}>
         <div className='diary-details-header'>
           <h1 className='diary-details-title'>{this.props.title}</h1>
           <h3 className='diary-details-date'>{`${timeDisplay} ${day} ${shortMonth} ${year}`}</h3>
