@@ -4,7 +4,6 @@ import { Link } from 'react-router'
 import {submitNewComment} from './requests.js'
 import {getDateObject} from './helper.js'
 import {DIARY_DETAILS_DEFAULT_CSS_HEIGHT, DIARY_DETAILS_CSS_HEIGHT_PER_COMMENT} from './constants.js'
-
 const { array, func, string, number } = React.PropTypes
 
 const DiaryEntry = React.createClass({
@@ -88,15 +87,18 @@ const DiaryEntry = React.createClass({
     let diaryDetailsStyle = {
       height: (DIARY_DETAILS_DEFAULT_CSS_HEIGHT + (DIARY_DETAILS_CSS_HEIGHT_PER_COMMENT * commentCount)) + 'px'
     }
-
+    console.log(diaryDetailsStyle)
     return (
       <section className='diary-details' style={diaryDetailsStyle}>
-        <div className='diary-details-header'>
-          <h1 className='diary-details-title'>{this.props.title}</h1>
-          <h3 className='diary-details-date'>{`${timeDisplay} ${day} ${shortMonth} ${year}`}</h3>
-        </div>
-        <div className='diary-details-content'>
-          <p>{this.props.body}</p>
+        <div className='diary-details-entry'>
+          <div className='diary-details-header'>
+            <h1 className='diary-details-title'>{this.props.title}</h1>
+            <h3 className='diary-details-date'>{`${timeDisplay} ${day} ${shortMonth} ${year}`}</h3>
+          </div>
+          <div className='diary-details-content'>
+            <p>{this.props.body}</p>
+          </div>
+          
         </div>
         <div className='diary-details-comments'>
           {this.props.comments.map((comment) => {
@@ -115,7 +117,6 @@ const DiaryEntry = React.createClass({
             )
           })}
         </div>
-
         <div className='diary-details-new-comment'>
           <form className='diary-details-new-comment-form' onSubmit={this.handleNewCommentSubmit}>
             <textarea className='new-comment-content' name='commentBody' onChange={this.handleCommentInput} />

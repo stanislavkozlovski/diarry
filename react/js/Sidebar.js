@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link, Redirect } from 'react-router'
+import { Link } from 'react-router'
 import {getLastFiveDiaryEntryMetaData} from './requests.js'
 
 import InfiniteCalendar from 'react-infinite-calendar'

@@ -152,6 +152,11 @@ section.diary-entries {
   border-left: 1px solid black;
   align-content: center;
 }
+div.diary-details-entry {
+  align-self: center;
+  width: 90%;
+  height: 1000px;
+}
 .diary-entries > a, .diary-entries > a:hover {
   /* anchor wrappers around diary-entry */
   text-decoration: none;
@@ -310,6 +315,7 @@ section.diary-entries {
 }
 
 .diary-details-header {
+  margin: 0 auto;
   margin-top: 75px;
   background: black;
   max-height: 90px;
@@ -343,6 +349,7 @@ section.diary-entries {
   max-height: 750px;
   align-self: center;
   padding: 20px 50px;
+  margin: 0 auto;
   margin-top: 25px;
   border: 1px solid black;
 }
