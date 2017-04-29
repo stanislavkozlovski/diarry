@@ -386,6 +386,9 @@ div.diary-details-entry {
   display: flex;
   flex-direction: column;
 }
+.diary-details-comments .diary-details-comment:last-of-type {
+  margin-bottom: 30px;
+}
 
 .diary-details-comment-header {
   background: black;
@@ -436,6 +439,7 @@ div.diary-details-entry {
   resize: none;
   padding: 20px;
   width: 80%;
+  height: 150px;
 }
 .diary-details-new-comment .new-comment-content:focus {
   outline: none;
@@ -448,6 +452,7 @@ div.diary-details-entry {
   padding: 20px;
   border-radius: 5px;
   font-size: 1.4em;
+  margin: auto 0;
   margin-left: 20px;
 }
 

@@ -98,6 +98,12 @@ const DiaryEntry = React.createClass({
             <p>{this.props.body}</p>
           </div>
         </div>
+        <div className='diary-details-new-comment'>
+          <form className='diary-details-new-comment-form' onSubmit={this.handleNewCommentSubmit}>
+            <textarea className='new-comment-content' name='commentBody' onChange={this.handleCommentInput} />
+            <button type='submit' className='new-comment-submit'>Comment</button>
+          </form>
+        </div>
         <div className='diary-details-comments'>
           {this.props.comments.map((comment) => {
             return (
@@ -115,12 +121,7 @@ const DiaryEntry = React.createClass({
             )
           })}
         </div>
-        <div className='diary-details-new-comment'>
-          <form className='diary-details-new-comment-form' onSubmit={this.handleNewCommentSubmit}>
-            <textarea className='new-comment-content' name='commentBody' onChange={this.handleCommentInput} />
-            <button type='submit' className='new-comment-submit'>Comment</button>
-          </form>
-        </div>
+        
       </div>
     )
   }
