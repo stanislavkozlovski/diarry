@@ -156,7 +156,7 @@ section.diary-entries {
 div.diary-details-entry {
   align-self: center;
   width: 90%;
-  height: 1000px;
+  /*height: 1000px;*/
 }
 .diary-entries > a, .diary-entries > a:hover {
   /* anchor wrappers around diary-entry */
@@ -209,6 +209,12 @@ div.diary-details-entry {
   text-align: left;
   padding: 20px;
   flex-grow: 1;
+}
+.diary-content p {
+  overflow: hidden;
+  word-wrap: break-word;
+  max-height: 105px;
+  white-space: pre;
 }
 .diary-footer {
   text-align: right;
@@ -312,7 +318,8 @@ div.diary-details-entry {
 /*************** DIARY DETAILS PAGE ***************/
 
 .diary-details {
-  height: 1000px;
+  /*height: 1000px;*/
+  overflow: hidden;
   flex-grow: 10;
   display: flex;
   flex-direction: column;
@@ -322,11 +329,11 @@ div.diary-details-entry {
 
 .diary-details-header {
   margin: 0 auto;
-  margin-top: 75px;
+  margin-top: 50px;
   background: black;
   max-height: 90px;
   width: 50%;
-  height: 10%;
+  height: 100px;
   align-self: center;
   color: white;
   display: flex;
@@ -352,12 +359,15 @@ div.diary-details-entry {
 .diary-details-content {
   width: 80%;
   height: 60%;
-  max-height: 750px;
+  /*max-height: 750px;*/
   align-self: center;
   padding: 20px 50px;
   margin: 0 auto;
   margin-top: 25px;
   border: 1px solid black;
+}
+.diary-details-content p {
+  white-space: pre;
 }
 
 .diary-details-content * {
@@ -365,7 +375,7 @@ div.diary-details-entry {
 }
 .diary-details-comments {
   width: 80%;
-    align-self: center;
+  margin: 0 auto;
 }
 .diary-details-comment {
   border-radius: 5px;
@@ -413,7 +423,9 @@ div.diary-details-entry {
 .diary-details-new-comment {
   align-self: center;
   width: 80%;
-  margin-top: 20px;
+  /*margin-top: 20px;*/
+  align-self: center;
+    margin: 28px auto 0 auto;
 }
 .diary-details-new-comment form {
   display: flex;

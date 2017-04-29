@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 
 import {submitNewComment} from './requests.js'
 import {getDateObject} from './helper.js'
-import {DIARY_DETAILS_DEFAULT_CSS_HEIGHT, DIARY_DETAILS_CSS_HEIGHT_PER_COMMENT} from './constants.js'
+
 const { array, func, string, number } = React.PropTypes
 
 const DiaryEntry = React.createClass({
@@ -49,6 +49,11 @@ const DiaryEntry = React.createClass({
         margin: '0 auto',
         borderBottom: '1px solid white'
       }
+      let entryBody = this.props.body
+
+      if (entryBody && entryBody.length > 500) {
+        entryBody = entryBody.substring(0, 500) + '...'
+      }
       // TODO: Don't build URL here dumbass
       return (
         <div className='diary-entry hvr-grow'>
@@ -60,7 +65,7 @@ const DiaryEntry = React.createClass({
             </header>
 
             <div className='diary-content'>
-              <p>{this.props.body}</p>
+              <p>{entryBody}</p>
             </div>
 
             <footer className='diary-footer'>
@@ -81,15 +86,9 @@ const DiaryEntry = React.createClass({
       comment.timeStr = commentDate.timeDisplay
       comment.dateString = commentDate.dateString
     })
-
-    // Modify the CSS height according to the amount of comments
-    let commentCount = this.props.comments.length
-    let diaryDetailsStyle = {
-      height: (DIARY_DETAILS_DEFAULT_CSS_HEIGHT + (DIARY_DETAILS_CSS_HEIGHT_PER_COMMENT * commentCount)) + 'px'
-    }
-    console.log(diaryDetailsStyle)
+    // TODO: Lazy loading of comments, say 20 per page. (This is as much front-end and as much back-end work)
     return (
-      <section className='diary-details' style={diaryDetailsStyle}>
+      <div>
         <div className='diary-details-entry'>
           <div className='diary-details-header'>
             <h1 className='diary-details-title'>{this.props.title}</h1>
@@ -98,7 +97,6 @@ const DiaryEntry = React.createClass({
           <div className='diary-details-content'>
             <p>{this.props.body}</p>
           </div>
-          
         </div>
         <div className='diary-details-comments'>
           {this.props.comments.map((comment) => {
@@ -123,7 +121,7 @@ const DiaryEntry = React.createClass({
             <button type='submit' className='new-comment-submit'>Comment</button>
           </form>
         </div>
-      </section>
+      </div>
     )
   }
 })

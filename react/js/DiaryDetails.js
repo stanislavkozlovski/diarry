@@ -1,6 +1,8 @@
 import React from 'react'
 import DiaryEntry from './DiaryEntry.js'
 import {getDiaryEntryDetails} from './requests.js'
+import {PAGE_HEADER_CSS_HEIGHT} from './constants.js'
+
 const { shape, string } = React.PropTypes
 // maybe turn into a stateless component and have a higher comp do AJAX :)
 const DiaryDetails = React.createClass({
@@ -44,8 +46,18 @@ const DiaryDetails = React.createClass({
     if (this.props.location.pathname === '/entry/new') { return <div /> }  // hacky way to avoid /entry/new matching this id
 
     if (this.state && this.state.body) {
+      // endless scroll style effect
+      let detailsWrapperStyle = {
+        marginRight: '-20px',
+        overflowY: 'scroll',
+        height: (window.innerHeight - PAGE_HEADER_CSS_HEIGHT) + 'px'
+      }
       return (
-        <DiaryEntry {...this.state} reload={this.reload} />
+        <section className='diary-details'>
+          <section className='details-wrapper' style={detailsWrapperStyle}>
+            <DiaryEntry {...this.state} reload={this.reload} />
+          </section>
+        </section>
       )
     } else if (this.state && this.state.error) {
       return <h1 className='alert alert-danger'> {this.state.error} </h1>
