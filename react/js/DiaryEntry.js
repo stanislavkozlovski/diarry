@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router'
 
 import {submitNewComment} from './requests.js'
-import {getDateObject} from './helper.js'
+import {getDateObject, sortByDateDescending} from './helper.js'
 
 const { array, func, string, number } = React.PropTypes
 
@@ -80,12 +80,15 @@ const DiaryEntry = React.createClass({
     // map the user friendly dates to the article comments
     this.props.comments.map((comment) => {
       const commentDate = getDateObject(comment.creation_date, comment.creation_time)
+      comment.dateObj = commentDate.dateObj
       comment.shortMonth = commentDate.shortMonth
       comment.day = commentDate.day
       comment.year = commentDate.year
       comment.timeStr = commentDate.timeDisplay
       comment.dateString = commentDate.dateString
     })
+  
+    this.props.comments.sort(sortByDateDescending)
     // TODO: Lazy loading of comments, say 20 per page. (This is as much front-end and as much back-end work)
     return (
       <div>

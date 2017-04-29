@@ -29,6 +29,7 @@ function getDateObject (wantedDate, wantedTime) {
   let timeDisplay = `${hourStr}:${minutesStr}`
 
   return {
+    dateObj: dateObj,
     year: year,
     day: dayStr,
     timeDisplay: timeDisplay,
@@ -37,4 +38,12 @@ function getDateObject (wantedDate, wantedTime) {
   }
 }
 
-export {getDateObject}
+/**
+ * A comparator function which takes two objects which preferably have a dateObj: Date() field in them
+ * It is meant to be used as a comparator function in a sort() function
+ * @param {Object} a
+ * @param {Object} b
+ */
+const sortByDateDescending = (a, b) => { return b.dateObj - a.dateObj }
+
+export {getDateObject, sortByDateDescending}
