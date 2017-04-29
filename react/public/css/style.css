@@ -5,9 +5,9 @@
   margin: 0px;
 }
 a, a:hover, a:focus {
-  text-decoration: none;
-  color: inherit;
-  outline: none;
+  text-decoration: none !important;
+  color: inherit !important;
+  outline: none !important;
 }
 button:focus {
   outline:  none;
@@ -22,8 +22,12 @@ header.title-header {
   height: 75px;
   text-align: center;
 }
+.title-header a {
+  color: black;
+}
 .title-header .title {
   font-size: 4em;
+  display: inline-block;
 }
 
 main {

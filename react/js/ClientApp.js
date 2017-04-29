@@ -1,6 +1,6 @@
 import React from 'react'
 import { render } from 'react-dom'
-import { HashRouter, Match } from 'react-router'
+import { HashRouter, Match, Link } from 'react-router'
 import axios from 'axios'
 
 import DiaryDetails from './DiaryDetails.js'
@@ -42,7 +42,7 @@ const App = React.createClass({
       <div>
         <header className='title-header'>
           <div className='title-box'>
-            <h1 className='title'>Diarry</h1>
+            <Link to={'/'}><h1 className='title'>Diarry</h1></Link>
           </div>
         </header>
         <main>
