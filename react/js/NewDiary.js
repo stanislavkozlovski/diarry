@@ -1,5 +1,7 @@
 import React from 'react'
+
 import {submitNewDiary} from './requests.js'
+import {getDateObject} from './helper.js'
 import SweetAlert from 'sweetalert-react'
 
 const NewDiary = React.createClass({
@@ -44,15 +46,8 @@ const NewDiary = React.createClass({
   },
 
   render () {
-    const currDate = new Date()
-    const shortMonth = currDate.toLocaleDateString('en-us', { month: 'short' })
-    const day = currDate.getDate()
-    const year = currDate.getFullYear()
-    const currMinutes = currDate.getMinutes()
-    const minutesString = (currMinutes < 10 ? '0' : '') + currMinutes
-    const timeStr = `${currDate.getHours()}:${minutesString}`
-    const dateString = `${shortMonth} ${day} ${year} - ${timeStr}`
-
+    const dateString = getDateObject().dateString
+    console.log(dateString)
     return (
       <section className='new-diary-post'>
         <SweetAlert
