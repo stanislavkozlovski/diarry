@@ -214,7 +214,7 @@ div.diary-details-entry {
   overflow: hidden;
   word-wrap: break-word;
   max-height: 105px;
-  white-space: pre;
+  white-space: pre-wrap;
 }
 .diary-footer {
   text-align: right;
@@ -367,7 +367,7 @@ div.diary-details-entry {
   border: 1px solid black;
 }
 .diary-details-content p {
-  white-space: pre;
+  white-space: pre-wrap;
 }
 
 .diary-details-content * {
@@ -379,7 +379,9 @@ div.diary-details-entry {
 }
 .diary-details-comment {
   border-radius: 5px;
-  height: 120px;
+  min-height: 120px;
+  max-height: 400px;
+  overflow: auto;
   width: 65%;
   margin-top: 25px;
   border: 1px solid black;
