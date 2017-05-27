@@ -21,7 +21,8 @@ def main():
             send_email()
             break
         except OSError as e:
-            print(f'{datetime.now()} - {e}')
+            print('{} - {}'.format(datetime.now, e))
+            # print(f'{datetime.now()} - {e}')
 
 
 def fetch_all_entries_sorted_by_date():
@@ -43,11 +44,17 @@ def format_diary_entry(entry: models.DiaryEntry) -> str:
     date = entry.creation_date.strftime("%d %B %Y")
     time = entry.creation_time.strftime("%H:%M")
 
-    formatted_entry = f"""\t\t\t\t\t\t\t{title}
-#{entry_id} - {date} {time}
+    formatted_entry = """\t\t\t\t\t\t\t{title}
+    #{entry_id} - {date} {time}
 
-{body}
-    """
+    {body}
+        """.format(title=title, entry_id=entry_id, date=date, time=time, body=body)
+    # Python 3 compatibility
+#     formatted_entry = f"""\t\t\t\t\t\t\t{title}
+# #{entry_id} - {date} {time}
+#
+# {body}
+#     """
     return formatted_entry
 
 
@@ -71,13 +78,14 @@ def send_email():
     smtp_connection.login(SENDER_EMAIL, SENDER_EMAIL_PASSWORD)
 
     message = MIMEMultipart()
-    message.attach(MIMEText(f'Be sure to store it in a safe place :)'))
+    message.attach(MIMEText('Be sure to store it in a safe place :)'))
     # Attach the file
     text_file_attachment = MIMEApplication(open("diary.txt", "rb").read())
     text_file_attachment.add_header('Content-Disposition', 'attachment', filename="diary.txt")
     message.attach(text_file_attachment)
 
-    message['Subject'] = f'Diary saved at {datetime.now().strftime("%d %B %Y")}'
+    message['Subject'] = 'Diary saved at {}'.format(datetime.now().strftime("%d %B %Y"))
+    # message['Subject'] = f'Diary saved at {datetime.now().strftime("%d %B %Y")}'
     message['From'] = SENDER_EMAIL
     message['To'] = RECEIVER_EMAIL
 

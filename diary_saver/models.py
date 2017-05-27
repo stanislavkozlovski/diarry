@@ -12,4 +12,5 @@ class DiaryEntry(Base):
     creation_time = Column(Time)
 
     def __repr__(self):
-        return f'Diary Entry #{self.id} - {self.title}. Created on {self.creation_date}{self.creation_time}'
+        return 'Diary Entry #{} - {}. Created on {}{}'.format(self.id, self.title, self.creation_date, self.creation_time)
+        # return f'Diary Entry #{self.id} - {self.title}. Created on {self.creation_date}{self.creation_time}'
