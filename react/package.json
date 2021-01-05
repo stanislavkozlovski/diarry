@@ -14,7 +14,7 @@
     "watch": "webpack --watch"
   },
   "dependencies": {
-    "axios": "0.15.2",
+    "axios": "0.21.1",
     "babel-jest": "^16.0.0",
     "dotenv": "^4.0.0",
     "history": "^4.4.0",
