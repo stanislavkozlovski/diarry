@@ -7,5 +7,5 @@ Regardless, the idea is to have this app be deployed externally with your unique
 
 This is still a work in progress and a tutorial for deployment will come once it's ready.
 
-TODO:
+# TODO:
 HTML/CSS re-design. Current design is atrocious. Needs a custom layout which is not full of hacks like the current one.
